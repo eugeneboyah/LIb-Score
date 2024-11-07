@@ -34,8 +34,12 @@
     background-color: #e8ebe8;
     padding: 10px;
 }
+.sidebar a {
+   text-decoration: none;
+}
 .myLeague{
     border-bottom: 1px solid #666;
+    margin-bottom: 10px;
     padding: 5px;
     background-color: #bfe2ff;
 
@@ -88,6 +92,11 @@
     background-color: #ffffff;
     padding: 15px;
     border-radius: 10px;
+}
+.league-list img {
+    width: 30px;
+    height: 30px;
+    margin: 0 10px;
 }
 .league-title {
     font-weight: bold;
