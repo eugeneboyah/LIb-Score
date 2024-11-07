@@ -1,4 +1,8 @@
  /* Custom styles */
+ *{
+    font-weight: bold;
+    box-sizing: border-box;
+ }
  body {
     font-family: Arial, sans-serif;
     background-color: #ffffff;
@@ -128,4 +132,21 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 5px;
+}
+
+.match-item{
+    display: flex;
+    justify-content: flex-start;
+}
+.match-time{
+    margin-right: 3rem;
+    color: red;
+}
+.teams{
+    margin-right: 5rem;
+}
+.scores{
+    margin-left: 30rem;
+    color: blue;
+    font-weight: bold;
 }
