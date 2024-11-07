@@ -64,6 +64,22 @@
     background-color: red;
     color: #ffffff;
 }
+
+ /* Main Scoreboard  navbar */
+.background{
+    background-color: red;
+    padding-bottom: 5px;
+    border-radius: 10px;
+}
+.main-navbtn{
+    border-radius: 10px;
+}
+.btn-hover{
+    background-color: red;
+    
+}
+
+/* Main Scoreboard  */
 .match-header {
     display: flex;
     justify-content: space-evenly;
