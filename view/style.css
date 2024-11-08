@@ -129,12 +129,13 @@
     padding: 10px;
     border-radius: 5px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     margin-bottom: 5px;
 }
 
-.match-item{
+/* live game styling */
+.match-item-for-live-game{
     display: flex;
     justify-content: flex-start;
 }
@@ -149,4 +150,35 @@
     margin-left: 30rem;
     color: blue;
     font-weight: bold;
+}
+
+/* Tabs for Fixtures and Results */
+.tabs-container .btn-tab {
+    font-size: 1rem;
+    font-weight: bold;
+    color: blue;
+    background-color: white;
+    border: 2px solid blue;
+    border-radius: 15px;
+    padding: 5px 15px;
+    margin-right: 10px;
+}
+
+.active-tab {
+    background-color: blue;
+    color: white;
+}
+.match-item-for-fixture{
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* Star Icon Styling */
+.star-icon {
+    font-size: 1.5rem;
+    color: red;
+}
+
+.star-icon i {
+    color: red;
 }
