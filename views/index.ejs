@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partlies/head') %>
+    <title>Sports Score Interface</title>
+
+</head>
+<body>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center">
+                <img src="/img/logo.jpeg" alt="Logo" width="200">
+                <h4 class="ms-2"></h4>
+            </div>
+            <a href="/pages/sign-in.html" class="text-primary fw-bold">Login</a>
+        </div>
+
+        <!-- Sports Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Football</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Tennis</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Basketball</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Golf</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Baseball</a>
+            </li>
+        </ul>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div class="myLeague">
+                    <h5 class="fw-bold">My League</h5>
+                </div>
+                <a href="#">
+                    <div class="league-item active">
+                        <img src="/img/orange-f.jpeg" alt="League" width="30" class="me-2">
+                        <h4>Orange First Division</h4> 
+                    </div>
+                </a>
+
+                <a href="#">
+                    <div class="league-item">
+                        <img src="/img/orange-s.jpeg" alt="League" width="30" class="me-2">
+                        <h4>Orange Second Division</h4> 
+                    </div>
+                </a>
+
+                <a href="#">
+                    <div class="league-item">
+                        <img src="/img/orange-w.png" alt="League" width="30" class="me-2">
+                        <h4>Orange Women Division</h4> 
+                    </div>
+                </a>
+
+                <a href="#">
+                    <div class="league-item">
+                        <img src="/img/meet.jpg" alt="League" width="30" class="me-2">
+                        <h4>National County Meet</h4>
+                    </div>
+                 </a>
+            </div>
+
+            <!-- Main Scoreboard -->
+
+             <!-- Main Scoreboard  navbar-->
+            <div class="col-md-9">
+                <div class="background">
+                    <div class="main-navbtn d-flex bg-light justify-content-between">
+                        <button class="btn btn-hover">All Games</button>
+                       <a href="live-game.html"><button class="btn btn-hover">Live Games</button></a>
+                       <a href="matches-fisture.html"><button class="btn btn-hover">Matches</button></a>
+                       <button class="btn btn-hover">Table</button>
+                    </div>
+                </div>
+
+                <!-- Next Match Section -->
+                <div class="match-header my-3">
+                    <div class="next-match-1">
+                        <h2>LPRC OILERS</h1>
+                        <img src="/img/lprc-removebg-preview.png" alt="Team Logo">
+                    </div>
+                    <div class="text-muted next-match-time">
+                        <h3> 2:00</h3>
+                        <h3>10 Nov</h3>
+                    </div>
+                    <div class="next-match-2">
+                        <img src="/img/PAYNESVILLE.png" alt="Team Logo">
+                        <h2>PAYNESVILLE FC</h1>
+                    </div>
+                     
+                    
+                </div>
+
+                <!-- League Matches -->
+                <div class="league-list">
+                    <div class="division-img">
+                        <img src="/img/orange-f.jpeg" alt="">
+                        <div class="league-title mt-4">Orange First Division League</div>
+                    </div>
+                    <div class="match-item">
+                        <div>
+                            <span>NPA Anchors</span>
+                            <img src="/img/NPA-removebg-preview.png" alt="Team Logo">
+
+                        </div>
+
+                        <div>
+                            <span class="text-muted">VS</span>
+                        </div>
+
+                        <div>
+                            <img src="/img/Mighty_Barrolle_logo.png" alt="Team Logo">
+                            <span>Mighty Barrolle</span>
+                        </div>
+
+                        <div>
+                            <span>Dec. 14 | 2:00 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="match-item">
+                        <div>
+                            <span>FC Bar Mountain</span>
+                            <img src="/img/MIN_ESC_BEA MOUNTAIN F.C..png" alt="Team Logo">
+
+                        </div>
+
+                        <div>
+                            <span class="text-muted">VS</span>
+                        </div>
+
+                        <div>
+                            <img src="/img/nimba-removebg-preview.png" alt="Team Logo">
+                            <span>Nimba Kwado</span>
+                        </div>
+
+                        <div>
+                            <span>Dec. 14 | 2:00 PM</span>
+                        </div>
+                    </div>
+
+                     <div class="match-item">
+                        <div>
+                            <span>Global Pharma</span>
+                            <img src="/img/globalp-removebg-preview.png" alt="Team Logo">
+
+                        </div>
+
+                        <div>
+                            <span class="text-muted">VS</span>
+                        </div>
+
+                        <div>
+                            <img src="/img/ceceu-removebg-preview.png" alt="Team Logo">
+                            <span>CECE United</span>
+                        </div>
+
+                        <div>
+                            <span>Dec. 14 | 2:00 PM</span>
+                        </div>
+                    </div>
+
+                    <div class="division-img">
+                        <img src="/img/orange-s.jpeg" alt="">
+                        <div class="league-title mt-4">Orange Second Division League</div>
+                    </div>
+                    <div class="match-item">
+                        <div>
+                            <span>FC Bar Mountain</span>
+                            <img src="/img/MIN_ESC_BEA MOUNTAIN F.C..png" alt="Team Logo">
+
+                        </div>
+
+                        <div>
+                            <span class="text-muted">VS</span>
+                        </div>
+
+                        <div>
+                            <img src="/img/nimba-removebg-preview.png" alt="Team Logo">
+                            <q z1 span>Nimba Kwado</span>
+                        </div>
+
+                        <div>
+                            <span>Dec. 14 | 2:00 PM</span>
+                        </div>
+                    </div>
+
+                     <div class="match-item">
+                        <div>
+                            <span>Global Pharma</span>
+                            <img src="/img/globalp-removebg-preview.png" alt="Team Logo">
+
+                        </div>
+
+                        <div>
+                            <span class="text-muted">VS</span>
+                        </div>
+
+                        <div>
+                            <img src="/img/ceceu-removebg-preview.png" alt="Team Logo">
+                            <span>CECE United</span>
+                        </div>
+
+                        <div>
+                            <span>Dec. 14 | 2:00 PM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

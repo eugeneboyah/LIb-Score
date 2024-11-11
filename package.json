@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "path": "^0.12.7",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  },
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "name": "lib-score",
+  "version": "1.0.0",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eugeneboyah/LIb-Score.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eugeneboyah/LIb-Score/issues"
+  },
+  "homepage": "https://github.com/eugeneboyah/LIb-Score#readme",
+  "description": ""
+}
