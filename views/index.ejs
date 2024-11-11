@@ -9,32 +9,8 @@
 
     <div class="container mt-4">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center">
-                <img src="/img/logo.jpeg" alt="Logo" width="200">
-                <h4 class="ms-2"></h4>
-            </div>
-            <a href="/pages/sign-in.html" class="text-primary fw-bold">Login</a>
-        </div>
-
-        <!-- Sports Navigation Tabs -->
-        <ul class="nav nav-tabs mb-4">
-            <li class="nav-item">
-                <a class="nav-link active" href="#">Football</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Tennis</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Basketball</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Golf</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Baseball</a>
-            </li>
-        </ul>
+   
+        <%- include('partlies/header') %>
 
         <!-- Main Content -->
         <div class="row">
@@ -79,8 +55,8 @@
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
                         <button class="btn btn-hover">All Games</button>
-                       <a href="live-game.html"><button class="btn btn-hover">Live Games</button></a>
-                       <a href="matches-fisture.html"><button class="btn btn-hover">Matches</button></a>
+                       <a href="live"><button class="btn btn-hover">Live Games</button></a>
+                       <a href="fixture"><button class="btn btn-hover">Matches</button></a>
                        <button class="btn btn-hover">Table</button>
                     </div>
                 </div>

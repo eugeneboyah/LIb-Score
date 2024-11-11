@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Sports Score Interface</title>
-    <%- included(partlies/head.ejs) %>
+    <%- include('partlies/head') %>
 
 </head>
 <body>
@@ -11,7 +11,7 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center">
-                <img src="/public/img/logo.jpeg" alt="Logo" width="200">
+                <img src="/img/logo.jpeg" alt="Logo" width="200">
                 <h4 class="ms-2"></h4>
             </div>
             <a href="#" class="text-primary fw-bold">Login</a>
@@ -45,28 +45,28 @@
                 </div>
                 <a href="#">
                     <div class="league-item active">
-                        <img src="/public/img/orange-f.jpeg" alt="League" width="30" class="me-2">
+                        <img src="/img/orange-f.jpeg" alt="League" width="30" class="me-2">
                         <h4>Orange First Division</h4> 
                     </div>
                 </a>
 
                 <a href="#">
                     <div class="league-item">
-                        <img src="/public/img/orange-s.jpeg" alt="League" width="30" class="me-2">
+                        <img src="/img/orange-s.jpeg" alt="League" width="30" class="me-2">
                         <h4>Orange Second Division</h4> 
                     </div>
                 </a>
 
                 <a href="#">
                     <div class="league-item">
-                        <img src="/public/img/orange-w.png" alt="League" width="30" class="me-2">
+                        <img src="/img/orange-w.png" alt="League" width="30" class="me-2">
                         <h4>Orange Women Division</h4> 
                     </div>
                 </a>
 
                 <a href="#">
                     <div class="league-item">
-                        <img src="/public/img/meet.jpg" alt="League" width="30" class="me-2">
+                        <img src="/img/meet.jpg" alt="League" width="30" class="me-2">
                         <h4>National County Meet</h4>
                     </div>
                  </a>
@@ -78,9 +78,9 @@
             <div class="col-md-9">
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
-                      <a href="index.html">  <button class="btn btn-hover">All Games</button></a>
+                      <a href="/">  <button class="btn btn-hover">All Games</button></a>
                         <button class="btn btn-hover">Live Games</button>
-                        <a href="matches-fisture.html"><button class="btn btn-hover">Matches</button></a>
+                        <a href="fixture"><button class="btn btn-hover">Matches</button></a>
                         <button class="btn btn-hover">Table</button>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
               <div class="league-list">
     
                 <div class="division-img">
-                    <img src="/public/img/orange-f.jpeg" alt="">
+                    <img src="/img/orange-f.jpeg" alt="">
                     <div class="league-title mt-4">Orange First Division League</div>
                 </div>
                 <div class="match-item">
@@ -98,11 +98,11 @@
                     </div>
                     <div class="teams">
                         <div class="team">
-                            <img src="/public/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
+                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
                             <span>NPA Anchors</span>
                         </div>
                         <div class="team">
-                            <img src="/public/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
+                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
                             <span>Mighty Barrolle</span>
                         </div>
                     </div>
@@ -118,11 +118,11 @@
                     </div>
                     <div class="teams">
                         <div class="team">
-                            <img src="/public/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
+                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
                             <span>NPA Anchors</span>
                         </div>
                         <div class="team">
-                            <img src="/public/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
+                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
                             <span>Mighty Barrolle</span>
                         </div>
                     </div>
@@ -138,11 +138,11 @@
                     </div>
                     <div class="teams">
                         <div class="team">
-                            <img src="/public/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
+                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
                             <span>NPA Anchors</span>
                         </div>
                         <div class="team">
-                            <img src="/public/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
+                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
                             <span>Mighty Barrolle</span>
                         </div>
                     </div>
@@ -153,7 +153,7 @@
                 </div>
             
                 <div class="division-img">
-                    <img src="/public/img/orange-s.jpeg" alt="">
+                    <img src="/img/orange-s.jpeg" alt="">
                     <div class="league-title mt-4">Orange Second Division League</div>
                 </div>
                 <div class="match-item">
@@ -162,11 +162,11 @@
                     </div>
                     <div class="teams">
                         <div class="team">
-                            <img src="/public/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
+                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
                             <span>NPA Anchors</span>
                         </div>
                         <div class="team">
-                            <img src="/public/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
+                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
                             <span>Mighty Barrolle</span>
                         </div>
                     </div>
@@ -182,11 +182,11 @@
                     </div>
                     <div class="teams">
                         <div class="team">
-                            <img src="/public/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
+                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
                             <span>NPA Anchors</span>
                         </div>
                         <div class="team">
-                            <img src="/public/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
+                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
                             <span>Mighty Barrolle</span>
                         </div>
                     </div>
@@ -202,11 +202,11 @@
                     </div>
                     <div class="teams">
                         <div class="team">
-                            <img src="/public/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
+                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
                             <span>NPA Anchors</span>
                         </div>
                         <div class="team">
-                            <img src="/public/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
+                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
                             <span>Mighty Barrolle</span>
                         </div>
                     </div>
