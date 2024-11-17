@@ -9,32 +9,7 @@
 
     <div class="container mt-4">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center">
-                <img src="/img/logo.jpeg" alt="Logo" width="200">
-                <h4 class="ms-2"></h4>
-            </div>
-            <a href="sign-in" class="text-primary fw-bold">Login</a>
-        </div>
-
-        <!-- Sports Navigation Tabs -->
-        <ul class="nav nav-tabs mb-4">
-            <li class="nav-item">
-                <a class="nav-link active" href="#">Football</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Tennis</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Basketball</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Golf</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Baseball</a>
-            </li>
-        </ul>
+        <%- include('partlies/header') %>
 
         <!-- Main Content -->
         <div class="row">
@@ -91,135 +66,37 @@
                     <a href="result"> <button class="btn btn-tab">Results</button></a>
                 </div>
 
-              <!-- Live Games Section -->
-              <div class="league-list">
-                <div class="division-img">
-                    <img src="/img/orange-f.jpeg" alt="">
-                    <div class="league-title mt-4">Orange First Division League</div>
-                </div>
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 22</span> <br>
-                        <span>2:00PM</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
+              <!-- Fixture Section -->
+                <div class="league-list">
+                    <% matches.forEach((match, index) => { %>
+                        <% if (index === 0 || matches[index - 1].league_name !== match.league_name) { %>
+                            <div class="division-img">
+                                <img src="/img/orange-f.jpeg" alt="<%= match.league_name %>">
+                                <div class="league-title mt-4"><%= match.league_name %></div>
+                            </div>
+                        <% } %>
+                        <div class="match-item">
+                            <div class="match-time">
+                                <span><%= new Date(match.start_time).toLocaleDateString() %></span> <br>
+                                <span><%= new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></span>
+                            </div>
+                            <div class="teams">
+                                <div class="team">
+                                    <img src="<%= match.home_team_logo %>" alt="<%= match.home_team_name %> Logo">
+                                    <span><%= match.home_team_name %></span>
+                                </div>
+                                <div class="team">
+                                    <img src="<%= match.away_team_logo %>" alt="<%= match.away_team_name %> Logo">
+                                    <span><%= match.away_team_name %></span>
+                                </div>
+                            </div>
+                            <div class="scores">
+                                <i class="bi bi-star"></i>
+                            </div>
                         </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <i class="bi bi-star"></i>
-                    </div>
-                </div>
-
-                 <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 22</span> <br>
-                        <span>2:00PM</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <i class="bi bi-star"></i>
-                    </div>
+                    <% }) %>
                 </div>
 
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 22</span> <br>
-                        <span>2:00PM</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <i class="bi bi-star"></i>
-                    </div>
-                </div>
-            
-                <div class="division-img">
-                    <img src="/img/orange-s.jpeg" alt="">
-                    <div class="league-title mt-4">Orange Second Division League</div>
-                </div>
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 22</span> <br>
-                        <span>2:00PM</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <i class="bi bi-star"></i>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 22</span> <br>
-                        <span>2:00PM</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <i class="bi bi-star"></i>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 22</span> <br>
-                        <span>2:00PM</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <i class="bi bi-star"></i>
-                    </div>
-                </div>
 
             </div>
             </div>

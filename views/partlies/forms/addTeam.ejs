@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <form method="POST" action="/register/team" class="container mt-4" enctype="multipart/form-data">
+
+        <input type="hidden" name="form_type" value="add_team">
+        <h3>Add Team</h3>
+        <div class="mb-3">
+            <label for="teamName" class="form-label">Team Name</label>
+            <input type="text" class="form-control" id="teamName" name="team_name" required>
+        </div>
+        <div class="mb-3">
+            <label for="logo" class="form-label">Logo</label>
+            <input type="file" class="form-control" id="logo" name="logo">
+
+        </div>
+        <div class="mb-3">
+            <label for="leagueId" class="form-label">League</label>
+            <select class="form-select" id="leagueId" name="league_id" required>
+                <% leagues.forEach(league => { %>
+                    <option value="<%= league.league_id %>"><%= league.league_name %></option>
+                <% }) %>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Team</button>
+    </form>
+</body>
+</html>
