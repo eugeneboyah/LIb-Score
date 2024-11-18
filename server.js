@@ -5,11 +5,26 @@ const bcrypt = require('bcryptjs');
 const app = express();
 const bodyParser = require('body-parser');
 const multer = require('multer');
-// Middleware for handling multipart/form-data for image uploads
-const upload = multer({ dest: 'uploads/' });
 
-app.use(express.urlencoded({ extended: true })); // To parse form data (application/x-www-form-urlencoded)
-app.use(express.json()); 
+// Set up multer for file uploads using memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 8 * 1024 * 1024 }, // Limit file size to 8MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Only images are allowed!'));
+  }
+});
+
+// Middleware to parse URL-encoded bodies (as sent by HTML forms)
+app.use(bodyParser.urlencoded({ extended: true }));
+
 // Set the view engine and static files
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -42,7 +57,7 @@ db.serialize(() => {
         CREATE TABLE IF NOT EXISTS Teams (
             team_id INTEGER PRIMARY KEY AUTOINCREMENT,
             team_name TEXT NOT NULL,
-            logo TEXT,
+            logo BLOB,
             league_id INTEGER,
             FOREIGN KEY (league_id) REFERENCES Leagues(league_id)
         )
@@ -181,19 +196,28 @@ app.get('/register', (req, res) => {
 });
 
 // Route for adding a team
-app.post('/register/team', upload.single('logo'), (req, res) => {
+app.post('/register/team', upload.single('logo_url'), (req, res) => {
+    console.log('Request body:', req.body);
+    console.log('Uploaded file:', req.file);
+    
     const { team_name, league_id } = req.body;
-    const logo = req.file ? req.file.filename : null;
-
+  
+    // Ensure a file was uploaded
+    if (!req.file) {
+      return res.status(400).send('Logo is required');
+    }
+  
+    const teamLogo = req.file.buffer; // Buffer containing the logo's binary data
+  
     const query = `INSERT INTO Teams (team_name, logo, league_id) VALUES (?, ?, ?)`;
-    db.run(query, [team_name, logo, league_id], function(err) {
-        if (err) {
-            console.error(err.message);
-            return res.status(500).send("Error adding team");
-        }
-        res.send("Team added successfully");
+    db.run(query, [team_name, teamLogo, league_id], (err) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).send('Error adding team');
+      }
+      res.send('Team added successfully');
     });
-});
+  });
 
 // Route for adding a match
 app.post('/register/match', (req, res) => {
@@ -259,8 +283,10 @@ app.get('/fixture', (req, res) => {
     const query = `
         SELECT 
             Matches.start_time, Matches.status, 
-            home_team.team_name AS home_team_name, home_team.logo AS home_team_logo, 
-            away_team.team_name AS away_team_name, away_team.logo AS away_team_logo, 
+            home_team.team_name AS home_team_name, 
+            home_team.logo AS home_team_logo, 
+            away_team.team_name AS away_team_name, 
+            away_team.logo AS away_team_logo, 
             Leagues.league_name 
         FROM Matches
         JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
@@ -268,16 +294,26 @@ app.get('/fixture', (req, res) => {
         JOIN Leagues ON Matches.league_id = Leagues.league_id
         ORDER BY Matches.start_time ASC
     `;
-    
+
     db.all(query, [], (err, matches) => {
         if (err) {
             console.error(err.message);
             return res.status(500).send("Error retrieving matches.");
         }
+
+        // Convert binary logo data to Base64
+        matches.forEach(match => {
+            if (match.home_team_logo) {
+                match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
+            }
+            if (match.away_team_logo) {
+                match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
+            }
+        });
+
         res.render('matches-fixture', { matches });
     });
 });
-
 
 app.get('/result', (req, res) => {
     res.render('matches-result'); 
