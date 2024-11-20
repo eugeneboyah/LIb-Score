@@ -4,9 +4,10 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const http = require('http');
 const { Server } = require('socket.io');
-const schedule = require('node-schedule');
 const bodyParser = require('body-parser');
 const multer = require('multer');
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ noServer: true });
 
 const app = express();
 const server = http.createServer(app);
@@ -48,178 +49,73 @@ const db = new sqlite3.Database('./lib_live_score.db', (err) => {
     }
 });
 
-// Track connected clients
-let liveGameClients = {};
+
+// Upgrade HTTP server to WebSocket
+server.on('upgrade', (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+    });
+});
 
 // Handle WebSocket connections
-io.on('connection', (socket) => {
-    console.log('A client connected');
-    
-    // Store the connection
-    liveGameClients[socket.id] = socket;
+wss.on('connection', (ws) => {
+    console.log('Client connected');
 
-    socket.on('disconnect', () => {
-        console.log('A client disconnected');
-        delete liveGameClients[socket.id];
+    ws.on('message', (message) => {
+        console.log('Received:', message);
+        // Handle incoming messages from clients (e.g., admin updates)
     });
+
+    ws.on('close', () => console.log('Client disconnected'));
 });
 
-// Schedule task to start games at their scheduled times
-schedule.scheduleJob('* * * * *', () => {
-    const now = new Date();
-    const query = `SELECT match_id FROM Matches WHERE status = 'scheduled' AND start_time <= ?`;
-    db.all(query, [now.toISOString()], (err, matches) => {
-        if (err) return console.error(err.message);
+// Broadcast function
+const broadcast = (data) => {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(data));
+        }
+    });
+};
 
-        matches.forEach((match) => {
-            const updateQuery = `UPDATE Matches SET status = 'ongoing' WHERE match_id = ?`;
-            db.run(updateQuery, [match.match_id], (err) => {
-                if (err) return console.error(err.message);
+const startTimersForScheduledMatches = () => {
+    setInterval(() => {
+        const query = `SELECT * FROM Matches WHERE status = 'scheduled' AND start_time <= ?`;
+        const now = new Date().toISOString();
+        db.all(query, [now], (err, matches) => {
+            if (err) return console.error("Error fetching matches:", err);
 
-                // Notify clients
-                io.emit('statusChange', { match_id: match.match_id, status: 'ongoing' });
+            matches.forEach(match => {
+                const updateQuery = `UPDATE Matches SET status = 'ongoing' WHERE match_id = ?`;
+                db.run(updateQuery, [match.match_id], (err) => {
+                    if (err) return console.error("Error updating match status:", err);
+
+                    broadcast({ type: 'match-started', match_id: match.match_id });
+
+                    // Start game timer
+                    startGameTimer(match.match_id);
+                });
             });
         });
-    });
-});
+    }, 60000); // Check every minute
+};
 
+const startGameTimer = (matchId) => {
+    let gameTime = 0;
+    const timer = setInterval(() => {
+        gameTime++;
+        if (gameTime > 90) {
+            clearInterval(timer);
+            broadcast({ type: 'match-ended', match_id: matchId });
+            db.run(`UPDATE Matches SET status = 'completed' WHERE match_id = ?`, [matchId]);
+        } else {
+            broadcast({ type: 'update-timer', match_id: matchId, time: gameTime });
+        }
+    }, 60000); // 1 minute interval
+};
 
+startTimersForScheduledMatches();
 
-// Create tables (called once when the app starts)
-db.serialize(() => {
-    // Leagues Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Leagues (
-            league_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            league_name TEXT NOT NULL
-        )
-    `);
-
-    // Teams Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Teams (
-            team_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            team_name TEXT NOT NULL,
-            logo BLOB,
-            league_id INTEGER,
-            FOREIGN KEY (league_id) REFERENCES Leagues(league_id)
-        )
-    `);
-
-    // Matches Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Matches (
-            match_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            home_team_id INTEGER NOT NULL,
-            away_team_id INTEGER NOT NULL,
-            league_id INTEGER,
-            start_time DATETIME,
-            end_time DATETIME,
-            status TEXT CHECK(status IN ('scheduled', 'ongoing', 'completed')),
-            venue TEXT,
-            referee TEXT,
-            FOREIGN KEY (home_team_id) REFERENCES Teams(team_id),
-            FOREIGN KEY (away_team_id) REFERENCES Teams(team_id),
-            FOREIGN KEY (league_id) REFERENCES Leagues(league_id)
-        )
-    `);
-
-    // Scores Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Scores (
-            score_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            home_score INTEGER DEFAULT 0,
-            away_score INTEGER DEFAULT 0,
-            time_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (match_id) REFERENCES Matches(match_id)
-        )
-    `);
-
-    // Players Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Players (
-            player_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            team_id INTEGER NOT NULL,
-            player_name TEXT NOT NULL,
-            position TEXT,
-            nationality TEXT,
-            age INTEGER,
-            jersey_number INTEGER,
-            FOREIGN KEY (team_id) REFERENCES Teams(team_id)
-        )
-    `);
-
-    // Match Events Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS MatchEvents (
-            event_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            player_id INTEGER,
-            team_id INTEGER,
-            event_type TEXT CHECK(event_type IN ('goal', 'yellow_card', 'red_card', 'substitution')),
-            event_time INTEGER,
-            description TEXT,
-            FOREIGN KEY (match_id) REFERENCES Matches(match_id),
-            FOREIGN KEY (player_id) REFERENCES Players(player_id),
-            FOREIGN KEY (team_id) REFERENCES Teams(team_id)
-        )
-    `);
-
-    // Substitutions Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Substitutions (
-            substitution_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            team_id INTEGER NOT NULL,
-            player_out_id INTEGER NOT NULL,
-            player_in_id INTEGER NOT NULL,
-            minute INTEGER,
-            FOREIGN KEY (match_id) REFERENCES Matches(match_id),
-            FOREIGN KEY (team_id) REFERENCES Teams(team_id),
-            FOREIGN KEY (player_out_id) REFERENCES Players(player_id),
-            FOREIGN KEY (player_in_id) REFERENCES Players(player_id)
-        )
-    `);
-
-    // Standings Table 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Standings (
-            standing_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            team_id INTEGER NOT NULL,
-            league_id INTEGER NOT NULL,
-            wins INTEGER DEFAULT 0,
-            losses INTEGER DEFAULT 0,
-            draws INTEGER DEFAULT 0,
-            points INTEGER DEFAULT 0,
-            goal_difference INTEGER DEFAULT 0,
-            FOREIGN KEY (team_id) REFERENCES Teams(team_id),
-            FOREIGN KEY (league_id) REFERENCES Leagues(league_id)
-        )
-    `);
-
-    // Roles Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Roles (
-            role_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            role_name TEXT NOT NULL UNIQUE
-        )
-    `);
-
-    // Users Table
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Users (
-            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            role_id INTEGER,
-            FOREIGN KEY (role_id) REFERENCES Roles(role_id)
-        )
-    `);
-
-    console.log("Tables created successfully.");
-});
 
 // Route handlers
 app.get('/', (req, res) => {
