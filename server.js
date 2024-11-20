@@ -2,9 +2,18 @@ const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
-const app = express();
+const http = require('http');
+const { Server } = require('socket.io');
+const schedule = require('node-schedule');
 const bodyParser = require('body-parser');
 const multer = require('multer');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+const port = 3000;
+
 
 // Set up multer for file uploads using memory storage
 const storage = multer.memoryStorage();
@@ -30,8 +39,6 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const port = 3000;
-
 // Open database connection once when the server starts
 const db = new sqlite3.Database('./lib_live_score.db', (err) => {
     if (err) {
@@ -40,6 +47,42 @@ const db = new sqlite3.Database('./lib_live_score.db', (err) => {
         console.log("Connected to SQLite database.");
     }
 });
+
+// Track connected clients
+let liveGameClients = {};
+
+// Handle WebSocket connections
+io.on('connection', (socket) => {
+    console.log('A client connected');
+    
+    // Store the connection
+    liveGameClients[socket.id] = socket;
+
+    socket.on('disconnect', () => {
+        console.log('A client disconnected');
+        delete liveGameClients[socket.id];
+    });
+});
+
+// Schedule task to start games at their scheduled times
+schedule.scheduleJob('* * * * *', () => {
+    const now = new Date();
+    const query = `SELECT match_id FROM Matches WHERE status = 'scheduled' AND start_time <= ?`;
+    db.all(query, [now.toISOString()], (err, matches) => {
+        if (err) return console.error(err.message);
+
+        matches.forEach((match) => {
+            const updateQuery = `UPDATE Matches SET status = 'ongoing' WHERE match_id = ?`;
+            db.run(updateQuery, [match.match_id], (err) => {
+                if (err) return console.error(err.message);
+
+                // Notify clients
+                io.emit('statusChange', { match_id: match.match_id, status: 'ongoing' });
+            });
+        });
+    });
+});
+
 
 
 // Create tables (called once when the app starts)
@@ -275,9 +318,33 @@ app.post('/register/event', (req, res) => {
     });
 });
 
+// API: Render live-game page
 app.get('/live', (req, res) => {
-    res.render('live-game'); 
+    const query = `
+        SELECT Matches.match_id, Matches.start_time, Matches.status, 
+               home_team.team_name AS home_team_name, home_team.logo AS home_team_logo,
+               away_team.team_name AS away_team_name, away_team.logo AS away_team_logo,
+               Scores.home_score, Scores.away_score, Leagues.league_name 
+        FROM Matches
+        LEFT JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
+        LEFT JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        LEFT JOIN Scores ON Matches.match_id = Scores.match_id
+        LEFT JOIN Leagues ON Matches.league_id = Leagues.league_id
+        WHERE Matches.status IN ('ongoing', 'scheduled')
+        ORDER BY Matches.start_time ASC
+    `;
+
+    db.all(query, [], (err, matches) => {
+        if (err) return res.status(500).send("Error fetching matches.");
+        matches.forEach(match => {
+            match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo || '').toString('base64')}`;
+            match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo || '').toString('base64')}`;
+        });
+        res.render('live-game', { matches });
+    });
 });
+
+
 
 app.get('/fixture', (req, res) => {
     const query = `
@@ -392,6 +459,10 @@ app.post('/sign-up', (req, res) => {
 
 app.get('/admin', (req, res) => {
     res.render('dashboard'); 
+});
+
+app.get('/control', (req, res) => {
+    res.render('control'); 
 });
 
 // Gracefully shut down and close the database connection

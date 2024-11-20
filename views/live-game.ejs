@@ -61,136 +61,39 @@
                 </div>
 
               <!-- Live Games Section -->
-              <div class="league-list">
-    
-                <div class="division-img">
-                    <img src="/img/orange-f.jpeg" alt="">
-                    <div class="league-title mt-4">Orange First Division League</div>
+                <div class="league-list">
+                    <% matches.forEach(match => { %>
+                        <div class="division-img">
+                            <img src="/public/img/orange-f.jpeg" alt="">
+                            <div class="league-title"><%= match.league_name %></div>
+                        </div>
+                        <div class="match-item" id="match-<%= match.match_id %>">
+                            <div class="match-time">
+                                <span
+                                    id="time-<%= match.match_id %>" 
+                                    data-start-time="<%= match.start_time %>" 
+                                    data-status="<%= match.status %>">
+                                    <%= match.status === 'ongoing' ? "0'" : "Scheduled" %>
+                                </span>
+                            </div>
+                            <div class="teams">
+                                <div class="team">
+                                    <img src="<%= match.home_team_logo %>" alt="">
+                                    <span><%= match.home_team_name %></span>
+                                </div>
+                                <div class="team">
+                                    <img src="<%= match.away_team_logo %>" alt="">
+                                    <span><%= match.away_team_name %></span>
+                                </div>
+                            </div>
+                            <div class="scores">
+                                <span id="home-score-<%= match.match_id %>"><%= match.home_score || 0 %></span> <br>
+                                <span id="away-score-<%= match.match_id %>"><%= match.away_score || 0 %></span>
+                            </div>
+                        </div>
+                    <% }) %>
                 </div>
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>54'</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>54'</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>54'</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-            
-                <div class="division-img">
-                    <img src="/img/orange-s.jpeg" alt="">
-                    <div class="league-title mt-4">Orange Second Division League</div>
-                </div>
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>54'</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>54'</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>54'</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-                </div>
+        
             </div>
             </div>
         </div>
@@ -198,5 +101,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+<script>
+  const socket = io();
+
+// Handle updates from the server
+socket.on('statusChange', (data) => {
+    const matchElement = document.getElementById(`match-${data.match_id}`);
+    if (data.status === 'ongoing') {
+        const timeElement = document.getElementById(`time-${data.match_id}`);
+        timeElement.textContent = "0'";
+    } else if (data.status === 'completed') {
+        matchElement.remove();
+    }
+});
+
+socket.on('scoreUpdate', (data) => {
+    document.getElementById(`home-score-${data.match_id}`).textContent = data.home_score;
+    document.getElementById(`away-score-${data.match_id}`).textContent = data.away_score;
+});
+</script>
 </body>
 </html>
