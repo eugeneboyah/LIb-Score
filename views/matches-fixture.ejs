@@ -3,6 +3,11 @@
 <head>
     <%- include('partlies/head') %>
     <title>Sports Score Interface</title>
+
+    <style>
+   
+
+    </style>
     
 </head>
 <body>
@@ -13,64 +18,42 @@
 
         <!-- Main Content -->
         <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 sidebar">
-                <div class="myLeague">
-                    <h5 class="fw-bold">My League</h5>
-                </div>
-                <a href="#">
-                    <div class="league-item active">
-                        <img src="/img/orange-f.jpeg" alt="League" width="30" class="me-2">
-                        <h4>Orange First Division</h4> 
-                    </div>
-                </a>
-
-                <a href="#">
-                    <div class="league-item">
-                        <img src="/img/orange-s.jpeg" alt="League" width="30" class="me-2">
-                        <h4>Orange Second Division</h4> 
-                    </div>
-                </a>
-
-                <a href="#">
-                    <div class="league-item">
-                        <img src="/img/orange-w.png" alt="League" width="30" class="me-2">
-                        <h4>Orange Women Division</h4> 
-                    </div>
-                </a>
-
-                <a href="#">
-                    <div class="league-item">
-                        <img src="/img/meet.jpg" alt="League" width="30" class="me-2">
-                        <h4>National County Meet</h4>
-                    </div>
-                 </a>
-            </div>
+         <!-- Sidebar -->
+         <%- include('partlies/aside.ejs') %>
+            
 
             <!-- Main Scoreboard -->
 
-             <!-- Main Scoreboard  navbar-->
+           <!-- Main Scoreboard Navbar -->
             <div class="col-md-9">
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
-                      <a href="/">  <button class="btn btn-hover">All Games</button></a>
-                       <a href="live"><button class="btn btn-hover">Live Games</button></a> 
+                        <a href="/" class="nav-btn-link">
+                            <button class="btn btn-hover">All Games</button>
+                        </a>
+                        <a href="live" class="nav-btn-link">
+                            <button class="btn btn-hover">Live Games</button>
+                        </a>
                         <button class="btn btn-hover">Matches</button>
                         <button class="btn btn-hover">Table</button>
                     </div>
                 </div>
 
-                        <!-- Fixtures and Results Tabs -->
+                <!-- Fixtures and Results Tabs -->
                 <div class="tabs-container d-flex justify-content-start mt-3 mb-3">
                     <button class="btn btn-tab active-tab">Fixtures</button>
-                    <a href="result"> <button class="btn btn-tab">Results</button></a>
+                    <a href="result" class="tab-btn-link">
+                        <button class="btn btn-tab">Results</button>
+                    </a>
                 </div>
+            </div>
+
 
                             <!-- Fixture Section -->
                 <div class="league-list">
                     <% matches.forEach((match, index) => { %>
                         <div class="division-img">
-                            <img src="/img/orange-f.jpeg" alt="">
+                            <!-- <img src="/img/orange-f.jpeg" alt=""> -->
                             <div class="league-title mt-4"><%= match.league_name %></div>
                         </div>
 
@@ -106,6 +89,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    <script src="/public/assets/js/socket.io.js"></script> 
+    <script src="/assets/js/socket.io.js"></script> 
+
+    <script src="/assets/js/nav.js"></script>
 </body>
 </html>

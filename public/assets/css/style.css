@@ -11,7 +11,7 @@
 
 /* NavBar styling */
 .nav-tabs{
-    background-color: red;
+    background-color: #ff4d4d;
     font-weight: bold;
     font-size: 18.3px;
 }
@@ -28,7 +28,7 @@
 }
 .nav-tabs .nav-link:hover {
     background-color: #ffffff;
-    color: red !important;
+    color: #ff4d4d!important;
     text-decoration: none;
 }
 
@@ -65,13 +65,13 @@
 }
 
 .league-item.active {
-    background-color: red;
+    background-color: #ff4d4d;
     color: #ffffff;
 }
 
  /* Main Scoreboard  navbar */
 .background{
-    background-color: red;
+    background-color: #ff4d4d;
     padding-bottom: 5px;
     border-radius: 10px;
     color: white;
@@ -81,7 +81,7 @@
     border-radius: 10px;
 }
 .btn-hover{
-    background-color: red;
+    background-color: #ff4d4d;
     color: white;
     
 }
@@ -155,7 +155,7 @@
 }
 .match-time{
     margin-right: 3rem;
-    color: red;
+    color: #ff4d4d;
 }
 .teams{
     margin-right: 5rem;
@@ -190,11 +190,11 @@
 /* Star Icon Styling */
 .star-icon {
     font-size: 1.5rem;
-    color: red;
+    color: #ff4d4d;
 }
 
 .star-icon i {
-    color: red;
+    color: #ff4d4d;
 }
 
 /* control */
@@ -214,4 +214,4 @@
 .box-blue { background-color: #007bff; color: white; }
 .box-green { background-color: #28a745; color: white; }
 .box-yellow { background-color: #ffc107; color: black; }
-.box-red { background-color: #dc3545; color: white; }
+.box-#ff4d4d{ background-color: #dc3545; color: white; }

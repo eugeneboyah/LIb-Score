@@ -1,0 +1,139 @@
+   /* main nav bar */
+
+   /* Navbar Container Styling */
+.nav-tabs {
+    background-color: red; /* Background of the navigation bar */
+    font-weight: bold;
+    font-size: 18.3px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+/* Tab Link Styling */
+.nav-tabs .nav-link {
+    color: white; /* Default text color */
+    font-weight: bold;
+    padding: 10px 15px;
+    border: none; /* Remove default borders */
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Hover Effect */
+.nav-tabs .nav-link:hover {
+    background-color: white; /* Background changes to white on hover */
+    color: red !important; /* Text color changes to red on hover */
+    text-decoration: none;
+}
+
+/* Active Tab Styling */
+.nav-tabs .nav-link.active {
+    background-color: white; /* White background for active tab */
+    color: red !important; /* Red text for active tab */
+    font-weight: bold;
+}
+
+   
+   /* Sidebar container styling */
+   .sidebar {
+    background-color: #f8f9fa; /* Light background for sidebar */
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* Header styling for "My League" */
+.myLeague {
+    background-color: #e3f2fd; /* Light blue header background */
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+/* League item styling */
+.league-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #ffffff; /* Default white background */
+    border: 1px solid #ced4da; /* Light gray border */
+    border-radius: 5px;
+    text-decoration: none; /* Remove underline */
+    color: #000000; /* Black text color */
+    transition: background-color 0.3s, color 0.3s; /* Smooth hover effect */
+    cursor: pointer;
+}
+
+/* Icon next to league name */
+.league-item img {
+    margin-right: 10px;
+    border-radius: 50%; /* Rounded icons */
+}
+
+/* Hover effect for league items */
+.league-item:hover {
+    background-color: #ff4d4d; /* #ff4d4d background on hover */
+    color: #ffffff; /* White text color */
+}
+
+/* Active state styling */
+.league-item.active {
+    background-color: #ff4d4d; /* #ff4d4d background for active item */
+    color: #ffffff; /* White text color */
+    border: 1px solid #ff4d4d; /* #ff4d4d border */
+}
+
+/* Ensure text stays white for active state */
+.league-item.active h4 {
+    color: #ffffff;
+}
+
+
+/* Main Navbar Buttons Styling */
+.main-navbtn .btn-hover {
+    background-color: white; /* Default background */
+    color: black; /* Default text color */
+    border: 1px solid #ff4d4d; /* Default #ff4d4d border */
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Hover Effect for Main Navbar Buttons */
+.main-navbtn .btn-hover:hover {
+    background-color: #ff4d4d; /* #ff4d4d background on hover */
+    color: white; /* White text color */
+}
+
+/* Active State for Main Navbar Buttons */
+.main-navbtn .btn-hover.active-btn {
+    background-color: #ff4d4d; /* #ff4d4d background for active button */
+    color: white; /* White text color */
+}
+
+/* Fixtures and Results Tabs Styling */
+.tabs-container .btn-tab {
+    background-color: white; /* Default background */
+    color: blue; /* Default text color */
+    border: 2px solid blue; /* Blue border */
+    padding: 5px 15px;
+    margin-right: 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Hover Effect for Tabs */
+.tabs-container .btn-tab:hover {
+    background-color: blue; /* Blue background on hover */
+    color: white; /* White text color */
+}
+
+/* Active Tab Styling */
+.tabs-container .btn-tab.active-tab {
+    background-color: blue; /* Blue background for active tab */
+    color: white; /* White text color */
+}

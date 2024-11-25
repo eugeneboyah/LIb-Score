@@ -319,44 +319,49 @@ app.get('/live', (req, res) => {
 });
 
 
-// Function to check if any match should be moved to "ongoing"
-function checkMatchStartTime() {
+// Set up an interval to check the start time for scheduled matches every minute
+setInterval(() => {
     const query = `
         SELECT match_id, start_time FROM Matches
-        WHERE status = 'scheduled' AND start_time <= ?
+        WHERE status = 'scheduled'
     `;
-    
-    // Run the query, passing the current time to check against scheduled matches
-    db.all(query, [moment().format('YYYY-MM-DD HH:mm:ss')], (err, matches) => {
+
+    // Query the database to find matches that are scheduled
+    db.all(query, [], (err, matches) => {
         if (err) {
-            console.error("Error fetching matches:", err.message);  // Log any errors
+            console.error("Error checking scheduled matches:", err.message);
             return;
         }
 
-        // Iterate through each match that has passed its start time
-        matches.forEach(match => {
-            // Update the match status to "ongoing"
-            const updateQuery = `
-                UPDATE Matches SET status = 'ongoing'
-                WHERE match_id = ?
-            `;
-            db.run(updateQuery, [match.match_id], function (err) {
-                if (err) {
-                    console.error("Error updating match status:", err.message); // Log any errors
-                    return;
-                }
+        // Loop through each scheduled match to check if the match time has passed
+        matches.forEach((match) => {
+            const currentTime = moment(); // Get the current time
+            const startTime = moment(match.start_time); // Parse the match's start time
 
-                console.log(`Match ${match.match_id} status updated to ongoing.`);  // Log success
+            // Check if the match start time has already passed
+            if (startTime.isBefore(currentTime)) {
+                // If the match has started, update its status to 'ongoing'
+                const updateQuery = `
+                    UPDATE Matches
+                    SET status = 'ongoing'
+                    WHERE match_id = ?
+                `;
 
-                // Emit the match status change to the frontend using Socket.IO
-                io.emit('matchStarted', { match_id: match.match_id });
-            });
+                // Run the query to update the match status
+                db.run(updateQuery, [match.match_id], function (err) {
+                    if (err) {
+                        console.error("Error updating match status:", err.message);
+                        return;
+                    }
+
+                    // Emit a message to the frontend that the match status has changed to 'ongoing'
+                    io.emit('matchStatusChanged', { match_id: match.match_id, status: 'ongoing' });
+                    console.log(`Match ${match.match_id} status changed to 'ongoing'`);
+                });
+            }
         });
     });
-}
-
-// Check every minute if any match status should be updated to ongoing
-setInterval(checkMatchStartTime, 60000);
+}, 60000); // Check every minute (60000 milliseconds)
 
 
 

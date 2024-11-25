@@ -3,6 +3,7 @@
 <head>
     <title>Sports Score Interface</title>
     <%- include('partlies/head') %>
+  
 
 </head>
 <body>
@@ -14,39 +15,7 @@
         <!-- Main Content -->
         <div class="row">
             <!-- Sidebar -->
-            <div class="col-md-3 sidebar">
-                <div class="myLeague">
-                    <h5 class="fw-bold">My League</h5>
-                </div>
-                <a href="#">
-                    <div class="league-item active">
-                        <img src="/img/orange-f.jpeg" alt="League" width="30" class="me-2">
-                        <h4>Orange First Division</h4> 
-                    </div>
-                </a>
-
-                <a href="#">
-                    <div class="league-item">
-                        <img src="/img/orange-s.jpeg" alt="League" width="30" class="me-2">
-                        <h4>Orange Second Division</h4> 
-                    </div>
-                </a>
-
-                <a href="#">
-                    <div class="league-item">
-                        <img src="/img/orange-w.png" alt="League" width="30" class="me-2">
-                        <h4>Orange Women Division</h4> 
-                    </div>
-                </a>
-
-                <a href="#">
-                    <div class="league-item">
-                        <img src="/img/meet.jpg" alt="League" width="30" class="me-2">
-                        <h4>National County Meet</h4>
-                    </div>
-                 </a>
-            </div>
-
+            <%- include('partlies/aside.ejs') %>
             <!-- Main Scoreboard -->
 
              <!-- Main Scoreboard  navbar-->
@@ -66,7 +35,7 @@
                         <!-- Display league name and image only when it's the first match of a league -->
                         <% if (index === 0 || matches[index - 1].league_name !== match.league_name) { %>
                             <div class="division-img">
-                                <img src="/img/orange-f.jpeg" alt="">
+                                <!-- <img src="/img/orange-f.jpeg" alt=""> -->
                                 <div class="league-title mt-4"><%= match.league_name %></div>
                             </div>
                         <% } %>
@@ -117,6 +86,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="/public/assets/js/websocket.js"></script>
      <script src="/public/assets/js/socket.io.js"></script> 
+     <script src="/assets/js/nav.js"></script>
+    </body>
     <!-- Add JavaScript -->
         <script>
             // Get current matches and start time
