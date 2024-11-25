@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%- include('partlies/head') %>
+    <!-- <%- include('partlies/head') %> -->
     <title>Sports Score Interface</title>
 
     <style>
-   
-
+        
     </style>
     
 </head>
@@ -19,35 +18,53 @@
         <!-- Main Content -->
         <div class="row">
          <!-- Sidebar -->
-         <%- include('partlies/aside.ejs') %>
-            
-
+        <div class="col-md-3 sidebar">
+            <div class="myLeague">
+                <h5>My League</h5>
+            </div>
+            <a href="/">
+                <div id="l1" class="league-item active">
+                    <img src="/img/orange-f.jpeg" alt="Orange First Division" width="30">
+                    <h4>Orange First Division</h4>
+                </div>
+            </a>
+            <a href="#">
+                <div id="l2" class="league-item">
+                    <img src="/img/orange-s.jpeg" alt="Orange Second Division" width="30">
+                    <h4>Orange Second Division</h4>
+                </div>
+            </a>
+            <a href="#">
+                <div id="l3" class="league-item">
+                    <img src="/img/orange-w.png" alt="Orange Women Division" width="30">
+                    <h4>Orange Women Division</h4>
+                </div>
+            </a>
+            <a href="#">
+                <div id="l4" class="league-item">
+                    <img src="/img/meet.jpg" alt="National County Meet" width="30">
+                    <h4>National County Meet</h4>
+                </div>
+            </a>
+        </div>
             <!-- Main Scoreboard -->
 
-           <!-- Main Scoreboard Navbar -->
+             <!-- Main Scoreboard  navbar-->
             <div class="col-md-9">
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
-                        <a href="/" class="nav-btn-link">
-                            <button class="btn btn-hover">All Games</button>
-                        </a>
-                        <a href="live" class="nav-btn-link">
-                            <button class="btn btn-hover">Live Games</button>
-                        </a>
+                      <a href="/">  <button class="btn btn-hover">All Games</button></a>
+                       <a href="live"><button class="btn btn-hover">Live Games</button></a> 
                         <button class="btn btn-hover">Matches</button>
                         <button class="btn btn-hover">Table</button>
                     </div>
                 </div>
 
-                <!-- Fixtures and Results Tabs -->
+                        <!-- Fixtures and Results Tabs -->
                 <div class="tabs-container d-flex justify-content-start mt-3 mb-3">
                     <button class="btn btn-tab active-tab">Fixtures</button>
-                    <a href="result" class="tab-btn-link">
-                        <button class="btn btn-tab">Results</button>
-                    </a>
+                    <a href="result"> <button class="btn btn-tab">Results</button></a>
                 </div>
-            </div>
-
 
                             <!-- Fixture Section -->
                 <div class="league-list">
@@ -79,9 +96,6 @@
                         </div>
                     <% }) %>
                 </div>
-
-
-
             </div>
             </div>
         </div>
@@ -89,8 +103,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    <script src="/assets/js/socket.io.js"></script> 
-
+    <script src="/public/assets/js/socket.io.js"></script> 
     <script src="/assets/js/nav.js"></script>
 </body>
 </html>

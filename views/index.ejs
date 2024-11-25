@@ -15,7 +15,35 @@
         <!-- Main Content -->
         <div class="row">
             <!-- Sidebar -->
-            <%- include('partlies/aside.ejs') %>
+            <div class="col-md-3 sidebar">
+                <div class="myLeague">
+                    <h5>My League</h5>
+                </div>
+                <a href="/">
+                    <div id="l1" class="league-item active">
+                        <img src="/img/orange-f.jpeg" alt="Orange First Division" width="30">
+                        <h4>Orange First Division</h4>
+                    </div>
+                </a>
+                <a href="#">
+                    <div id="l2" class="league-item">
+                        <img src="/img/orange-s.jpeg" alt="Orange Second Division" width="30">
+                        <h4>Orange Second Division</h4>
+                    </div>
+                </a>
+                <a href="#">
+                    <div id="l3" class="league-item">
+                        <img src="/img/orange-w.png" alt="Orange Women Division" width="30">
+                        <h4>Orange Women Division</h4>
+                    </div>
+                </a>
+                <a href="#">
+                    <div id="l4" class="league-item">
+                        <img src="/img/meet.jpg" alt="National County Meet" width="30">
+                        <h4>National County Meet</h4>
+                    </div>
+                </a>
+            </div>
 
             <!-- Main Scoreboard -->
 
@@ -30,146 +58,93 @@
                     </div>
                 </div>
 
-                <!-- first division Next Match Section -->
+                <!-- Next Match -->
+                <h6 class="text-muted mt-2">NEXT MATCH</h6>
                 <div class="match-header my-3">
-                    <div class="next-match-1">
-                        <h2>LPRC OILERS</h1>
-                        <img src="/img/lprc-removebg-preview.png" alt="Team Logo">
-                    </div>
-                    <div class="text-muted next-match-time">
-                        <h3> 2:00</h3>
-                        <h3>10 Nov</h3>
-                    </div>
-                    <div class="next-match-2">
-                        <img src="/img/PAYNESVILLE.png" alt="Team Logo">
-                        <h2>PAYNESVILLE FC</h1>
-                    </div>
-                     
                     
+                    <% if (nextMatch) { %>
+                        <div class="match-header my-3">
+                            <div class="next-match-1">
+                                <h2><%= nextMatch.home_team_name %></h2>
+                                <img src="<%= nextMatch.home_team_logo %>" alt="Team Logo">
+                            </div>
+                            <div class="text-muted next-match-time">
+                                <h3><%= new Date(nextMatch.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) %></h3>
+                                <h3><%= new Date(nextMatch.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></h3>
+                            </div>
+                            <div class="next-match-2">
+                                <img src="<%= nextMatch.away_team_logo %>" alt="Team Logo">
+                                <h2><%= nextMatch.away_team_name %></h2>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p>No upcoming matches available.</p>
+                    <% } %>
                 </div>
 
-                <!-- League Matches -->
+                            <!-- Fixtures -->
                 <div class="league-list">
-                    <div class="division-img">
+                    <h6 class="text-muted mt-2">FIXTURE</h6>
+                    <!-- <div class="division-img">
                         <img src="/img/orange-f.jpeg" alt="">
                         <div class="league-title mt-4">Orange First Division League</div>
-                    </div>
-                    <div class="match-item">
-                        <div>
-                            <span>NPA Anchors</span>
-                            <img src="/img/NPA-removebg-preview.png" alt="Team Logo">
-
+                    </div> -->
+                    <% fixtures.forEach(match => { %>
+                        <div class="match-item">
+                            <div>
+                                <span><%= match.home_team_name %></span>
+                                <img src="<%= match.home_team_logo %>" alt="Team Logo">
+                            </div>
+                            <div>
+                                <span class="text-muted">VS</span>
+                            </div>
+                            <div>
+                                <img src="<%= match.away_team_logo %>" alt="Team Logo">
+                                <span><%= match.away_team_name %></span>
+                            </div>
+                            <div>
+                                <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %> | 
+                                    <%= new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                                </span>
+                            </div>
                         </div>
-
-                        <div>
-                            <span class="text-muted">VS</span>
-                        </div>
-
-                        <div>
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Team Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-
-                        <div>
-                            <span>Dec. 14 | 2:00 PM</span>
-                        </div>
-                    </div>
-
-                    <div class="match-item">
-                        <div>
-                            <span>FC Bar Mountain</span>
-                            <img src="/img/MIN_ESC_BEA MOUNTAIN F.C..png" alt="Team Logo">
-
-                        </div>
-
-                        <div>
-                            <span class="text-muted">VS</span>
-                        </div>
-
-                        <div>
-                            <img src="/img/nimba-removebg-preview.png" alt="Team Logo">
-                            <span>Nimba Kwado</span>
-                        </div>
-
-                        <div>
-                            <span>Dec. 14 | 2:00 PM</span>
-                        </div>
-                    </div>
-
-                     <div class="match-item">
-                        <div>
-                            <span>Global Pharma</span>
-                            <img src="/img/globalp-removebg-preview.png" alt="Team Logo">
-
-                        </div>
-
-                        <div>
-                            <span class="text-muted">VS</span>
-                        </div>
-
-                        <div>
-                            <img src="/img/ceceu-removebg-preview.png" alt="Team Logo">
-                            <span>CECE United</span>
-                        </div>
-
-                        <div>
-                            <span>Dec. 14 | 2:00 PM</span>
-                        </div>
-                    </div>
-
-                    <div class="division-img">
-                        <img src="/img/orange-s.jpeg" alt="">
-                        <div class="league-title mt-4">Orange Second Division League</div>
-                    </div>
-                    <div class="match-item">
-                        <div>
-                            <span>FC Bar Mountain</span>
-                            <img src="/img/MIN_ESC_BEA MOUNTAIN F.C..png" alt="Team Logo">
-
-                        </div>
-
-                        <div>
-                            <span class="text-muted">VS</span>
-                        </div>
-
-                        <div>
-                            <img src="/img/nimba-removebg-preview.png" alt="Team Logo">
-                            <q z1 span>Nimba Kwado</span>
-                        </div>
-
-                        <div>
-                            <span>Dec. 14 | 2:00 PM</span>
-                        </div>
-                    </div>
-
-                     <div class="match-item">
-                        <div>
-                            <span>Global Pharma</span>
-                            <img src="/img/globalp-removebg-preview.png" alt="Team Logo">
-
-                        </div>
-
-                        <div>
-                            <span class="text-muted">VS</span>
-                        </div>
-
-                        <div>
-                            <img src="/img/ceceu-removebg-preview.png" alt="Team Logo">
-                            <span>CECE United</span>
-                        </div>
-
-                        <div>
-                            <span>Dec. 14 | 2:00 PM</span>
-                        </div>
-                    </div>
+                    <% }) %>
                 </div>
+
+                <!-- Results -->
+                <div class="league-list">
+                    <h6 class="text-muted mt-2">RESULT</h6>
+                    <% results.forEach(match => { %>
+                        <div class="match-item">
+                            <div class="match-time">
+                                <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span> <br>
+                                <span class="status"><%= match.status %></span>
+                            </div>
+                            <div class="teams">
+                                <div class="team">
+                                    <img src="<%= match.home_team_logo %>" alt="<%= match.home_team_name %> Logo">
+                                    <span><%= match.home_team_name %></span>
+                                </div>
+                                <div class="team">
+                                    <img src="<%= match.away_team_logo %>" alt="<%= match.away_team_name %> Logo">
+                                    <span><%= match.away_team_name %></span>
+                                </div>
+                            </div>
+                            <div class="scores">
+                                <div class="score"><%= match.home_score || 0 %></div>
+                                <div class="score"><%= match.away_score || 0 %></div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    <script src="/public/assets/js/websocket.js"></script>
+    <script src="/assets/js/websocket.js"></script>
     <script src="/assets/js/nav.js"></script>
 </body>
 </html>

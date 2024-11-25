@@ -121,9 +121,93 @@ io.on('connection', (socket) => {
 
 // Route handlers
 app.get('/', (req, res) => {
-    res.render('index'); 
-});
+    const nextMatchQuery = `
+        SELECT 
+            Matches.match_id, Matches.start_time, Matches.status,
+            home_team.team_name AS home_team_name, home_team.logo AS home_team_logo,
+            away_team.team_name AS away_team_name, away_team.logo AS away_team_logo
+        FROM Matches
+        JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
+        JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        WHERE Matches.league_id = 1 AND Matches.status = 'scheduled'
+        ORDER BY Matches.start_time ASC
+        LIMIT 1
+    `;
 
+    const fixturesQuery = `
+        SELECT 
+            Matches.start_time, Matches.status,
+            home_team.team_name AS home_team_name, home_team.logo AS home_team_logo,
+            away_team.team_name AS away_team_name, away_team.logo AS away_team_logo
+        FROM Matches
+        JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
+        JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        WHERE Matches.league_id = 1 AND Matches.status = 'scheduled'
+        ORDER BY Matches.start_time ASC
+        LIMIT 4
+    `;
+
+    const resultsQuery = `
+        SELECT 
+            Matches.start_time, Matches.status,
+            home_team.team_name AS home_team_name, home_team.logo AS home_team_logo,
+            away_team.team_name AS away_team_name, away_team.logo AS away_team_logo,
+            Scores.home_score, Scores.away_score
+        FROM Matches
+        JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
+        JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        JOIN Scores ON Matches.match_id = Scores.match_id
+        WHERE Matches.league_id = 1 AND Matches.status = 'completed'
+        ORDER BY Matches.start_time DESC
+        LIMIT 4
+    `;
+
+    // Query for the next match
+    db.all(nextMatchQuery, [], (err, nextMatch) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Error retrieving the next match.");
+        }
+
+        // Query for fixtures
+        db.all(fixturesQuery, [], (err, fixtures) => {
+            if (err) {
+                console.error(err.message);
+                return res.status(500).send("Error retrieving fixtures.");
+            }
+
+            // Query for results
+            db.all(resultsQuery, [], (err, results) => {
+                if (err) {
+                    console.error(err.message);
+                    return res.status(500).send("Error retrieving results.");
+                }
+
+                // Convert binary logo data to Base64 (if applicable)
+                const processLogos = matches => matches.forEach(match => {
+                    if (match.home_team_logo) {
+                        match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
+                    }
+                    if (match.away_team_logo) {
+                        match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
+                    }
+                });
+
+                // Process logos for matches
+                if (nextMatch.length) processLogos(nextMatch);
+                if (fixtures.length) processLogos(fixtures);
+                if (results.length) processLogos(results);
+
+                // Render the page
+                res.render('index.ejs', {
+                    nextMatch: nextMatch.length ? nextMatch[0] : null, // Get the first match or null if empty
+                    fixtures,
+                    results
+                });
+            });
+        });
+    });
+});
 
 // Route to render the forms with leagues
 app.get('/register', (req, res) => {
@@ -276,7 +360,7 @@ app.post('/register/event', (req, res) => {
 
 // Route to fetch ongoing matches for the live game page
 app.get('/live', (req, res) => {
-    // SQL query to join necessary tables and fetch ongoing matches
+    // SQL query to join necessary tables and fetch ongoing matches for league one
     const query = `
         SELECT 
             Matches.match_id, Matches.start_time, Matches.status,
@@ -291,8 +375,8 @@ app.get('/live', (req, res) => {
         JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
         JOIN Leagues ON Matches.league_id = Leagues.league_id
         LEFT JOIN Scores ON Matches.match_id = Scores.match_id
-        WHERE Matches.status = 'ongoing'  -- Only fetch matches with status 'ongoing'
-        ORDER BY Matches.start_time ASC  -- Order by start time
+        WHERE Matches.status = 'ongoing' AND Matches.league_id = 1 -- Only fetch ongoing matches for league one
+        ORDER BY Matches.start_time ASC -- Order by start time
     `;
 
     // Execute the query to fetch matches
@@ -317,6 +401,7 @@ app.get('/live', (req, res) => {
         res.render('live-game', { matches: processedMatches });
     });
 });
+
 
 
 // Set up an interval to check the start time for scheduled matches every minute
@@ -375,7 +460,7 @@ app.get('/fixture', (req, res) => {
         SET status = 'ongoing'
         WHERE status = 'scheduled' AND start_time <= ?
     `;
-    
+
     // Update the status of scheduled matches to ongoing if the start time has passed
     db.run(updateStatusQuery, [currentTime.toISOString()], function(err) {
         if (err) {
@@ -383,7 +468,7 @@ app.get('/fixture', (req, res) => {
         }
     });
 
-    // Query to get the fixture (only matches that are scheduled)
+    // Query to get fixtures (only matches that are scheduled for league one)
     const query = `
         SELECT 
             Matches.match_id, Matches.start_time, Matches.status, 
@@ -396,7 +481,7 @@ app.get('/fixture', (req, res) => {
         JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
         JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
         JOIN Leagues ON Matches.league_id = Leagues.league_id
-        WHERE Matches.status = 'scheduled'
+        WHERE Matches.status = 'scheduled' AND Matches.league_id = 1 -- Filter for league one
         ORDER BY Matches.start_time ASC
     `;
 
@@ -423,6 +508,7 @@ app.get('/fixture', (req, res) => {
 
 
 
+
 app.get('/result', (req, res) => {
     const query = `
         SELECT 
@@ -438,7 +524,7 @@ app.get('/result', (req, res) => {
         JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
         JOIN Leagues ON Matches.league_id = Leagues.league_id
         LEFT JOIN Scores ON Matches.match_id = Scores.match_id
-        WHERE Matches.status = 'completed'
+        WHERE Matches.status = 'completed' AND Matches.league_id = 1
         ORDER BY Matches.start_time DESC
     `;
 
@@ -461,6 +547,8 @@ app.get('/result', (req, res) => {
         res.render('matches-result', { matches });
     });
 });
+
+
 
 app.get('/billing', (req, res) => {
     res.render('billing'); 

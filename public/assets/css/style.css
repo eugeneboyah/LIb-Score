@@ -211,6 +211,11 @@
 .dashboard-box p {
   font-size: 1.2rem;
 }
+
+.next-match-time{
+    font-size: 18px;
+}
+
 .box-blue { background-color: #007bff; color: white; }
 .box-green { background-color: #28a745; color: white; }
 .box-yellow { background-color: #ffc107; color: black; }
