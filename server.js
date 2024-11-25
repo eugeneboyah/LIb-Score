@@ -1,20 +1,22 @@
+const WebSocket = require("ws");
 const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
-const http = require('http');
-const { Server } = require('socket.io');
+const app = express();
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ noServer: true });
+const cron = require('node-cron');
+const http = require('http');
+const socketIo = require('socket.io');
+const moment = require('moment'); // Import moment.js for handling date and time
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
 
+const server = http.createServer(app); // Pass your app to the HTTP server
+const io = socketIo(server);          // Attach Socket.IO to the server
 const port = 3000;
 
+const wss = new WebSocket.Server({ port: 8081 });
 
 // Set up multer for file uploads using memory storage
 const storage = multer.memoryStorage();
@@ -40,6 +42,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 // Open database connection once when the server starts
 const db = new sqlite3.Database('./lib_live_score.db', (err) => {
     if (err) {
@@ -49,73 +52,72 @@ const db = new sqlite3.Database('./lib_live_score.db', (err) => {
     }
 });
 
+// Listen for score updates
+io.on('connection', (socket) => {
+    console.log("A user connected");
 
-// Upgrade HTTP server to WebSocket
-server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit('connection', ws, request);
+    socket.on('disconnect', () => {
+        console.log("A user disconnected");
     });
 });
 
-// Handle WebSocket connections
-wss.on('connection', (ws) => {
-    console.log('Client connected');
+// cron.schedule('* * * * *', () => {
+//     const query = `
+//         SELECT match_id, start_time, status, home_team_id, away_team_id, league_id
+//         FROM Matches
+//         WHERE status = 'ongoing'
+//     `;
 
-    ws.on('message', (message) => {
-        console.log('Received:', message);
-        // Handle incoming messages from clients (e.g., admin updates)
-    });
+//     db.all(query, [], (err, matches) => {
+//         if (err) {
+//             console.error("Error fetching matches:", err.message);
+//             return;
+//         }
 
-    ws.on('close', () => console.log('Client disconnected'));
-});
+//         const now = Date.now();
+//         matches.forEach(match => {
+//             const matchStartTime = new Date(match.start_time).getTime();
+//             const elapsedMinutes = Math.floor((now - matchStartTime) / 60000);
 
-// Broadcast function
-const broadcast = (data) => {
-    wss.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(data));
-        }
-    });
-};
+//             if (elapsedMinutes >= 90 && match.status === 'ongoing') {
+//                 const updateQuery = `UPDATE Matches SET status = 'completed' WHERE match_id = ?`;
+//                 db.run(updateQuery, [match.match_id], (updateErr) => {
+//                     if (updateErr) {
+//                         console.error('Error updating match status:', updateErr.message);
+//                     } else {
+//                         // Emit event with updated match data
+//                         io.emit('matchStatusUpdate', {
+//                             match_id: match.match_id,
+//                             status: 'completed',
+//                             home_team_id: match.home_team_id,
+//                             away_team_id: match.away_team_id,
+//                             league_id: match.league_id,
+//                         });
+//                     }
+//                 });
+//             }
+//         });
+//     });
+// });
 
-const startTimersForScheduledMatches = () => {
-    setInterval(() => {
-        const query = `SELECT * FROM Matches WHERE status = 'scheduled' AND start_time <= ?`;
-        const now = new Date().toISOString();
-        db.all(query, [now], (err, matches) => {
-            if (err) return console.error("Error fetching matches:", err);
 
-            matches.forEach(match => {
-                const updateQuery = `UPDATE Matches SET status = 'ongoing' WHERE match_id = ?`;
-                db.run(updateQuery, [match.match_id], (err) => {
-                    if (err) return console.error("Error updating match status:", err);
+// const broadcastUpdates = () => {
+//     const liveQuery = `
+//         SELECT * FROM Matches WHERE status = 'ongoing';
+//     `;
+//     db.all(liveQuery, [], (err, matches) => {
+//         if (!err) {
+//             wss.clients.forEach(client => {
+//                 if (client.readyState === WebSocket.OPEN) {
+//                     client.send(JSON.stringify(matches));
+//                 }
+//             });
+//         }
+//     });
+// };
 
-                    broadcast({ type: 'match-started', match_id: match.match_id });
-
-                    // Start game timer
-                    startGameTimer(match.match_id);
-                });
-            });
-        });
-    }, 60000); // Check every minute
-};
-
-const startGameTimer = (matchId) => {
-    let gameTime = 0;
-    const timer = setInterval(() => {
-        gameTime++;
-        if (gameTime > 90) {
-            clearInterval(timer);
-            broadcast({ type: 'match-ended', match_id: matchId });
-            db.run(`UPDATE Matches SET status = 'completed' WHERE match_id = ?`, [matchId]);
-        } else {
-            broadcast({ type: 'update-timer', match_id: matchId, time: gameTime });
-        }
-    }, 60000); // 1 minute interval
-};
-
-startTimersForScheduledMatches();
-
+// // Call this function every minute
+// setInterval(broadcastUpdates, 60000);
 
 // Route handlers
 app.get('/', (req, res) => {
@@ -158,6 +160,27 @@ app.post('/register/team', upload.single('logo_url'), (req, res) => {
     });
   });
 
+  const updateMatchStatus = () => {
+    const query = `
+        UPDATE Matches
+        SET status = 'completed'
+        WHERE status = 'ongoing' AND
+              strftime('%s', 'now') - strftime('%s', start_time) >= 5400
+    `; // 5400 seconds = 90 minutes
+
+    db.run(query, [], (err) => {
+        if (err) {
+            console.error("Error updating match statuses:", err.message);
+        } else {
+            console.log("Match statuses updated successfully.");
+        }
+    });
+};
+
+// Run the check every minute
+setInterval(updateMatchStatus, 60000);
+
+
 // Route for adding a match
 app.post('/register/match', (req, res) => {
     const { home_team_id, away_team_id, league_id, start_time, status } = req.body;
@@ -172,19 +195,56 @@ app.post('/register/match', (req, res) => {
     });
 });
 
-// Route for adding a score
+// Route to handle updating scores
 app.post('/register/score', (req, res) => {
     const { match_id, home_score, away_score } = req.body;
+    const currentTime = new Date().toISOString();  // Get current timestamp
 
-    const query = `INSERT INTO Scores (match_id, home_score, away_score) VALUES (?, ?, ?)`;
-    db.run(query, [match_id, home_score, away_score], function(err) {
+    // Check if the match already has a score record
+    const selectQuery = `SELECT * FROM Scores WHERE match_id = ?`;
+
+    db.get(selectQuery, [match_id], (err, row) => {
         if (err) {
             console.error(err.message);
-            return res.status(500).send("Error adding score");
+            return res.status(500).send("Error checking score record");
         }
-        res.send("Score added successfully");
+
+        if (row) {
+            // If record exists, update the scores
+            const updateQuery = `
+                UPDATE Scores
+                SET home_score = ?, away_score = ?, time_updated = ?
+                WHERE match_id = ?
+            `;
+            db.run(updateQuery, [home_score, away_score, currentTime, match_id], function (err) {
+                if (err) {
+                    console.error(err.message);
+                    return res.status(500).send("Error updating score");
+                }
+                console.log(`Updated match ${match_id} score: Home - ${home_score}, Away - ${away_score}`);
+                io.emit('scoreUpdate', { match_id, home_score, away_score });
+                res.send("Score updated successfully");
+            });
+        } else {
+            // If no record exists, insert a new score record
+            const insertQuery = `
+                INSERT INTO Scores (match_id, home_score, away_score, time_updated)
+                VALUES (?, ?, ?, ?)
+            `;
+            db.run(insertQuery, [match_id, home_score, away_score, currentTime], function (err) {
+                if (err) {
+                    console.error(err.message);
+                    return res.status(500).send("Error inserting score");
+                }
+                console.log(`Inserted match ${match_id} score: Home - ${home_score}, Away - ${away_score}`);
+                io.emit('scoreUpdate', { match_id, home_score, away_score });
+                res.send("Score inserted successfully");
+            });
+        }
     });
 });
+
+
 
 // Route for adding a player
 app.post('/register/player', (req, res) => {
@@ -214,38 +274,114 @@ app.post('/register/event', (req, res) => {
     });
 });
 
-// API: Render live-game page
+// Route to fetch ongoing matches for the live game page
 app.get('/live', (req, res) => {
+    // SQL query to join necessary tables and fetch ongoing matches
     const query = `
-        SELECT Matches.match_id, Matches.start_time, Matches.status, 
-               home_team.team_name AS home_team_name, home_team.logo AS home_team_logo,
-               away_team.team_name AS away_team_name, away_team.logo AS away_team_logo,
-               Scores.home_score, Scores.away_score, Leagues.league_name 
+        SELECT 
+            Matches.match_id, Matches.start_time, Matches.status,
+            home_team.team_name AS home_team_name, 
+            home_team.logo AS home_team_logo, 
+            away_team.team_name AS away_team_name, 
+            away_team.logo AS away_team_logo, 
+            Leagues.league_name,
+            Scores.home_score, Scores.away_score
         FROM Matches
-        LEFT JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
-        LEFT JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
+        JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        JOIN Leagues ON Matches.league_id = Leagues.league_id
         LEFT JOIN Scores ON Matches.match_id = Scores.match_id
-        LEFT JOIN Leagues ON Matches.league_id = Leagues.league_id
-        WHERE Matches.status IN ('ongoing', 'scheduled')
-        ORDER BY Matches.start_time ASC
+        WHERE Matches.status = 'ongoing'  -- Only fetch matches with status 'ongoing'
+        ORDER BY Matches.start_time ASC  -- Order by start time
     `;
 
+    // Execute the query to fetch matches
     db.all(query, [], (err, matches) => {
-        if (err) return res.status(500).send("Error fetching matches.");
-        matches.forEach(match => {
-            match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo || '').toString('base64')}`;
-            match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo || '').toString('base64')}`;
-        });
-        res.render('live-game', { matches });
+        if (err) {
+            console.error("Error fetching matches:", err.message); // Log error if query fails
+            return res.status(500).send("Error retrieving live matches."); // Respond with error
+        }
+
+        // Process matches: Convert team logos into base64 format for direct use in HTML
+        const processedMatches = matches.map(match => ({
+            ...match, // Keep existing match properties
+            home_team_logo: match.home_team_logo 
+                ? `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`
+                : null, // Convert home team logo to base64 or use null if not available
+            away_team_logo: match.away_team_logo 
+                ? `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`
+                : null  // Convert away team logo to base64 or use null if not available
+        }));
+
+        // Render the live-game view and pass the processed matches data
+        res.render('live-game', { matches: processedMatches });
     });
 });
 
 
+// Function to check if any match should be moved to "ongoing"
+function checkMatchStartTime() {
+    const query = `
+        SELECT match_id, start_time FROM Matches
+        WHERE status = 'scheduled' AND start_time <= ?
+    `;
+    
+    // Run the query, passing the current time to check against scheduled matches
+    db.all(query, [moment().format('YYYY-MM-DD HH:mm:ss')], (err, matches) => {
+        if (err) {
+            console.error("Error fetching matches:", err.message);  // Log any errors
+            return;
+        }
 
+        // Iterate through each match that has passed its start time
+        matches.forEach(match => {
+            // Update the match status to "ongoing"
+            const updateQuery = `
+                UPDATE Matches SET status = 'ongoing'
+                WHERE match_id = ?
+            `;
+            db.run(updateQuery, [match.match_id], function (err) {
+                if (err) {
+                    console.error("Error updating match status:", err.message); // Log any errors
+                    return;
+                }
+
+                console.log(`Match ${match.match_id} status updated to ongoing.`);  // Log success
+
+                // Emit the match status change to the frontend using Socket.IO
+                io.emit('matchStarted', { match_id: match.match_id });
+            });
+        });
+    });
+}
+
+// Check every minute if any match status should be updated to ongoing
+setInterval(checkMatchStartTime, 60000);
+
+
+
+// Route to get match fixture
 app.get('/fixture', (req, res) => {
+    const currentTime = new Date(); // Current server time
+
+    // Query to update the status of matches whose start time has passed
+    const updateStatusQuery = `
+        UPDATE Matches
+        SET status = 'ongoing'
+        WHERE status = 'scheduled' AND start_time <= ?
+    `;
+    
+    // Update the status of scheduled matches to ongoing if the start time has passed
+    db.run(updateStatusQuery, [currentTime.toISOString()], function(err) {
+        if (err) {
+            console.error(err.message);
+        }
+    });
+
+    // Query to get the fixture (only matches that are scheduled)
     const query = `
         SELECT 
-            Matches.start_time, Matches.status, 
+            Matches.match_id, Matches.start_time, Matches.status, 
             home_team.team_name AS home_team_name, 
             home_team.logo AS home_team_logo, 
             away_team.team_name AS away_team_name, 
@@ -255,6 +391,7 @@ app.get('/fixture', (req, res) => {
         JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
         JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
         JOIN Leagues ON Matches.league_id = Leagues.league_id
+        WHERE Matches.status = 'scheduled'
         ORDER BY Matches.start_time ASC
     `;
 
@@ -274,12 +411,50 @@ app.get('/fixture', (req, res) => {
             }
         });
 
+        // Render the fixture page with the scheduled matches
         res.render('matches-fixture', { matches });
     });
 });
 
+
+
 app.get('/result', (req, res) => {
-    res.render('matches-result'); 
+    const query = `
+        SELECT 
+            Matches.match_id, Matches.start_time, Matches.status,
+            home_team.team_name AS home_team_name, 
+            home_team.logo AS home_team_logo, 
+            away_team.team_name AS away_team_name, 
+            away_team.logo AS away_team_logo, 
+            Leagues.league_name,
+            Scores.home_score, Scores.away_score
+        FROM Matches
+        JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
+        JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        JOIN Leagues ON Matches.league_id = Leagues.league_id
+        LEFT JOIN Scores ON Matches.match_id = Scores.match_id
+        WHERE Matches.status = 'completed'
+        ORDER BY Matches.start_time DESC
+    `;
+
+    db.all(query, [], (err, matches) => {
+        if (err) {
+            console.error("Error fetching match results:", err.message);
+            return res.status(500).send("Error retrieving match results.");
+        }
+
+        // Convert logos to base64 if necessary
+        matches.forEach(match => {
+            if (match.home_team_logo) {
+                match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
+            }
+            if (match.away_team_logo) {
+                match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
+            }
+        });
+
+        res.render('matches-result', { matches });
+    });
 });
 
 app.get('/billing', (req, res) => {

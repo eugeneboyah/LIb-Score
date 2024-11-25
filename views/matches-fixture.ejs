@@ -66,16 +66,16 @@
                     <a href="result"> <button class="btn btn-tab">Results</button></a>
                 </div>
 
-              <!-- Fixture Section -->
+                            <!-- Fixture Section -->
                 <div class="league-list">
                     <% matches.forEach((match, index) => { %>
-                        <% if (index === 0 || matches[index - 1].league_name !== match.league_name) { %>
-                            <div class="division-img">
-                                <img src="/img/orange-f.jpeg" alt="">
-                                <div class="league-title mt-4"><%= match.league_name %></div>
-                            </div>
-                        <% } %>
-                        <div class="match-item">
+                        <div class="division-img">
+                            <img src="/img/orange-f.jpeg" alt="">
+                            <div class="league-title mt-4"><%= match.league_name %></div>
+                        </div>
+
+                        <!-- Each match item gets a unique ID to make it easier to target -->
+                        <div class="match-item" id="match-<%= match.match_id %>">
                             <div class="match-time">
                                 <span><%= new Date(match.start_time).toLocaleDateString() %></span> <br>
                                 <span><%= new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></span>
@@ -86,7 +86,7 @@
                                     <span><%= match.home_team_name %></span>
                                 </div>
                                 <div class="team">
-                                    <img src="<%= match.away_team_logo %>" alt=" ">
+                                    <img src="<%= match.away_team_logo %>" alt="">
                                     <span><%= match.away_team_name %></span>
                                 </div>
                             </div>
@@ -98,6 +98,7 @@
                 </div>
 
 
+
             </div>
             </div>
         </div>
@@ -105,5 +106,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="/public/assets/js/socket.io.js"></script> 
 </body>
 </html>

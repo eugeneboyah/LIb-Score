@@ -28,10 +28,7 @@ db.serialize(() => {
             away_team_id INTEGER NOT NULL,
             league_id INTEGER,
             start_time DATETIME,
-            end_time DATETIME,
             status TEXT CHECK(status IN ('scheduled', 'ongoing', 'completed')),
-            venue TEXT,
-            referee TEXT,
             FOREIGN KEY (home_team_id) REFERENCES Teams(team_id),
             FOREIGN KEY (away_team_id) REFERENCES Teams(team_id),
             FOREIGN KEY (league_id) REFERENCES Leagues(league_id)

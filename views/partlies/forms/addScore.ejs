@@ -10,19 +10,29 @@
     <h3 class="mt-5">Add Score</h3>
     <form method="POST" action="/register/score">
         <input type="hidden" name="form_type" value="add_score">
+    
+        <!-- Match ID Field -->
         <div class="mb-3">
             <label for="matchId" class="form-label">Match ID</label>
             <input type="number" class="form-control" id="matchId" name="match_id" required>
         </div>
+    
+        <!-- Home Team Score Field -->
         <div class="mb-3">
             <label for="homeScore" class="form-label">Home Team Score</label>
             <input type="number" class="form-control" id="homeScore" name="home_score" required>
         </div>
+    
+        <!-- Away Team Score Field -->
         <div class="mb-3">
             <label for="awayScore" class="form-label">Away Team Score</label>
             <input type="number" class="form-control" id="awayScore" name="away_score" required>
         </div>
+    
+        <!-- Submit Button -->
         <button type="submit" class="btn btn-primary">Add Score</button>
     </form>
+    
+    
 </body>
 </html>

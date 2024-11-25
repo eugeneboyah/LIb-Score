@@ -67,141 +67,42 @@
                     <button class="btn btn-tab">Results</button>
                 </div>
 
-              <!-- Live Games Section -->
-              <div class="league-list">
-                <div class="division-img">
-                    <img src="/img/orange-f.jpeg" alt="">
-                    <div class="league-title mt-4">Orange First Division League</div>
+                <div class="league-list">
+                    <% let currentLeague = ''; %>
+                    <% matches.forEach(match => { %>
+                        <% if (match.league_name !== currentLeague) { %>
+                            <!-- League Header -->
+                            <div class="division-img">
+                                <img src="/img/<%= match.league_name.replace(/ /g, '-').toLowerCase() %>.jpeg" alt="">
+                                <div class="league-title mt-4"><%= match.league_name %></div>
+                            </div>
+                            <% currentLeague = match.league_name; %>
+                        <% } %>
+                
+                        <!-- Match Item -->
+                        <div class="match-item">
+                            <div class="match-time">
+                                <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span> <br>
+                                <span class="status"><%= match.status %></span>
+                            </div>
+                            <div class="teams">
+                                <div class="team">
+                                    <img src="<%= match.home_team_logo %>" alt="<%= match.home_team_name %> Logo">
+                                    <span><%= match.home_team_name %></span>
+                                </div>
+                                <div class="team">
+                                    <img src="<%= match.away_team_logo %>" alt="<%= match.away_team_name %> Logo">
+                                    <span><%= match.away_team_name %></span>
+                                </div>
+                            </div>
+                            <div class="scores">
+                                <div class="score"><%= match.home_score || 0 %></div>
+                                <div class="score"><%= match.away_score || 0 %></div>
+                            </div>
+                        </div>
+                    <% }) %>
                 </div>
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Oct. 22</span> <br>
-                        <span>FT</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                 <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 1</span> <br>
-                        <span>FT</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 6</span> <br>
-                        <span>FT</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-            
-                <div class="division-img">
-                    <img src="/img/orange-s.jpeg" alt="">
-                    <div class="league-title mt-4">Orange Second Division League</div>
-                </div>
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 22</span> <br>
-                        <span>2:00PM</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 3</span> <br>
-                        <span>FT</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
-
-                <div class="match-item">
-                    <div class="match-time">
-                        <span>Nov. 2</span> <br>
-                        <span>FT</span>
-                    </div>
-                    <div class="teams">
-                        <div class="team">
-                            <img src="/img/NPA-removebg-preview.png" alt="NPA Anchors Logo">
-                            <span>NPA Anchors</span>
-                        </div>
-                        <div class="team">
-                            <img src="/img/Mighty_Barrolle_logo.png" alt="Mighty Barrolle Logo">
-                            <span>Mighty Barrolle</span>
-                        </div>
-                    </div>
-                    <div class="scores">
-                        <div class="score">0</div>
-                        <div class="score">1</div>
-                    </div>
-                </div>
+                
 
             </div>
             </div>
@@ -210,5 +111,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="/public/assets/js/socket.io.js"></script> 
 </body>
 </html>
