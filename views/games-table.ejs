@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Live Games</title>
+    <%- include('partlies/head') %>
+  
+
+</head>
+<body>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <%- include('partlies/header') %>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div class="myLeague">
+                    <h5>My League</h5>
+                </div>
+                <a href="/live?league_id=1">
+                    <div id="l1" class="league-item">
+                        <img src="/img/orange-f.jpeg" alt="Orange First Division" width="30">
+                        <h4>Orange First Division</h4>
+                    </div>
+                </a>
+                <a href="/live?league_id=2">
+                    <div id="l2" class="league-item">
+                        <img src="/img/orange-s.jpeg" alt="Orange Second Division" width="30">
+                        <h4>Orange Second Division</h4>
+                    </div>
+                </a>
+                <a href="/live?league_id=3">
+                    <div id="l3" class="league-item">
+                        <img src="/img/orange-w.png" alt="Orange Women Division" width="30">
+                        <h4>Orange Women Division</h4>
+                    </div>
+                </a>
+                <a href="/live?league_id=4">
+                    <div id="l4" class="league-item">
+                        <img src="/img/meet.jpg" alt="National County Meet" width="30">
+                        <h4>National County Meet</h4>
+                    </div>
+                </a>
+                
+            </div>
+            <!-- Main Scoreboard -->
+
+             <!-- Main Scoreboard  navbar-->
+            <div class="col-md-9">
+                <div class="background">
+                    <div class="main-navbtn d-flex bg-light justify-content-between">
+                      <a href="index">  <button class="btn btn-hover">All Games</button></a>
+                        <button class="btn btn-hover">Live Games</button>
+                        <a href="fixture"><button class="btn btn-hover">Matches</button></a>
+                        <a href="table"><button class="btn btn-hover">Table</button></a>
+                    </div>
+                </div>
+                <section class="dashcontainer">
+                    <main class="main_display">
+                        <div>
+                            <a class="nav-item nav-link sidebar_headlings d-flex justify-content-between align-items-center" href="#">
+                                <span>First Division Leauge Table</span>
+                                <i class="fa-solid fa-angle-right"></i>
+                            </a>
+                        </div>
+                        <section class="table_content_sec">
+                            <table class="table_leageu1">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Team</th>
+                                        <th title="Matches Played">P</th>
+                                        <th title="Matches Won">W</th>
+                                        <th title="Matches Drawn">D</th>
+                                        <th title="Matches Lost">L</th>
+                                        <th title="Points">PTS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Sample data -->
+                                    <tr>
+                                        <td>1</td>
+                                        <td><img class="main_content_imgs" src="./images/ELWA-Utd-logo-128x128-removebg-preview.png" alt=""><a href="">Manchester City</a></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>9</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td><img class="main_content_imgs" src="./images/ELWA-Utd-logo-128x128-removebg-preview.png" alt=""><a href="">Manchester City</a></td>
+                                        <td>3</td>
+                                        <td>3</td>
+                                        <td>0</td>
+                                        <td>0</td>
+                                        <td>9</td>
+                                    </tr>
+                                    <!-- Additional rows can be added in a similar way -->
+                                </tbody>
+                            </table>
+                        </section>
+                    </main>
+                </section>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="/public/assets/js/websocket.js"></script>
+     <script src="/assets/js/socket.io.js"></script> 
+     <script src="/assets/js/nav.js"></script>
+    </body>
+  
+</body>
+</html>

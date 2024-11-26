@@ -1,0 +1,92 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.dashcontainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.main_display {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar_headlings {
+    font-size: 24px;
+    color: #0044cc;
+    text-decoration: none;
+}
+
+.sidebar_headlings i {
+    color: #ff3333;
+}
+
+.selection_link {
+    margin-top: 20px;
+}
+
+.selection_btn {
+    background-color: #0044cc;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.selection_btn:hover {
+    background-color: #ff3333;
+}
+
+.table_content_sec {
+    margin-top: 30px;
+}
+
+.table_leageu1 {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.table_leageu1 th,
+.table_leageu1 td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+.table_leageu1 th {
+    background-color: #0044cc;
+    color: white;
+}
+
+.table_leageu1 tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table_leageu1 tr:hover {
+    background-color: #ffcccc;
+}
+
+.main_content_imgs {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+a {
+    text-decoration: none;
+    color: #0044cc;
+}
+
+a:hover {
+    color: #ff3333;
+}
+

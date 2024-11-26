@@ -567,7 +567,9 @@ app.get('/result', (req, res) => {
     });
 });
 
-
+app.get('/table', (req, res) => {
+    res.render('games-table'); 
+});
 
 
 app.get('/billing', (req, res) => {
