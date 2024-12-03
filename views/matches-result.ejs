@@ -51,52 +51,54 @@
             <div class="col-md-9">
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
-                      <a href="index">  <button class="btn btn-hover">All Games</button></a>
-                       <a href="live"><button class="btn btn-hover">Live Games</button></a> 
-                        <a href=""></a><button class="btn btn-hover">Matches</button>
-                        <a href="table"><button class="btn btn-hover">Table</button></a>
+                        <a href="/index?league_id=<%= league_id %>"><button class="btn btn-hover">Overview</button></a>
+                        <a href="/live?league_id=<%= league_id %>"><button class="btn btn-hover">Live Games</button></a>
+                        <a href="/fixture?league_id=<%= league_id %>"><button class="btn btn-hover">Matches</button></a>
+                        <a href="/table?league_id=<%= league_id %>"><button class="btn btn-hover">Table</button></a>
                     </div>
                 </div>
 
                         <!-- Fixtures and Results Tabs -->
                 <div class="tabs-container d-flex justify-content-start mt-3 mb-3">
-                    <a href="fixture"><button class="btn btn-tab active-tab">Fixtures</button> </a>
-                    <button class="btn btn-tab">Results</button>
+                    <a href="/fixture?league_id=<%= league_id %>"><button class="btn btn-tab active-tab">Fixtures</button> </a>
+                   <a href="/result?league_id=<%= league_id %>"><button class="btn btn-tab">Results</button></a> 
                 </div>
 
                 <div class="league-list">
                     <% let currentLeague = ''; %>
                     <% matches.forEach(match => { %>
                         <% if (match.league_name !== currentLeague) { %>
-                            <!-- League Header -->
+                            <!-- Display League Header -->
                             <div class="division-img">
-                                <!-- <img src="/img/<%= match.league_name.replace(/ /g, '-').toLowerCase() %>.jpeg" alt=""> -->
                                 <div class="league-title mt-4"><%= match.league_name %></div>
                             </div>
                             <% currentLeague = match.league_name; %>
                         <% } %>
                 
                         <!-- Match Item -->
-                        <div class="match-item">
-                            <div class="match-time">
-                                <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span> <br>
-                                <span class="status"><%= match.status %></span>
-                            </div>
-                            <div class="teams">
-                                <div class="team">
-                                    <img src="<%= match.home_team_logo %>" alt="<%= match.home_team_name %> Logo">
-                                    <span><%= match.home_team_name %></span>
+                        <a href="/statistices?match_id=<%= match.match_id %>">
+                            <div class="match-item">
+                                <div class="match-time">
+                                    <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span><br>
+                                    <span class="status"><%= match.status %></span>
                                 </div>
-                                <div class="team">
-                                    <img src="<%= match.away_team_logo %>" alt="<%= match.away_team_name %> Logo">
-                                    <span><%= match.away_team_name %></span>
+                                <div class="teams">
+                                    <div class="team">
+                                        <img src="<%= match.home_team_logo %>" alt="<%= match.home_team_name %> Logo">
+                                        <span><%= match.home_team_name %></span>
+                                    </div>
+                                    <div class="team">
+                                        <img src="<%= match.away_team_logo %>" alt="<%= match.away_team_name %> Logo">
+                                        <span><%= match.away_team_name %></span>
+                                    </div>
+                                </div>
+                                <div class="scores">
+                                    <!-- Display the scores for completed matches -->
+                                    <div class="score"><%= match.home_score || 0 %></div>
+                                    <div class="score"><%= match.away_score || 0 %></div>
                                 </div>
                             </div>
-                            <div class="scores">
-                                <div class="score"><%= match.home_score || 0 %></div>
-                                <div class="score"><%= match.away_score || 0 %></div>
-                            </div>
-                        </div>
+                        </a>
                     <% }) %>
                 </div>
                 

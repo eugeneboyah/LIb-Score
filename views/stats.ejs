@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Statistices</title>
+    <%- include('partlies/head') %>
+    <link rel="stylesheet" href="/assets/css/stats.css">
+  
+
+</head>
+<body>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <%- include('partlies/header') %>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div class="myLeague">
+                    <h5>My League</h5>
+                </div>
+                <a href="/index?league_id=1">
+                    <div id="l1" class="league-item">
+                        <img src="/img/orange-f.jpeg" alt="Orange First Division" width="30">
+                        <h4>Orange First Division</h4>
+                    </div>
+                </a>
+                <a href="/index?league_id=2">
+                    <div id="l2" class="league-item">
+                        <img src="/img/orange-s.jpeg" alt="Orange Second Division" width="30">
+                        <h4>Orange Second Division</h4>
+                    </div>
+                </a>
+                <a href="/index?league_id=3">
+                    <div id="l3" class="league-item">
+                        <img src="/img/orange-w.png" alt="Orange Women Division" width="30">
+                        <h4>Orange Women Division</h4>
+                    </div>
+                </a>
+                <a href="/index?league_id=4">
+                    <div id="l4" class="league-item">
+                        <img src="/img/meet.jpg" alt="National County Meet" width="30">
+                        <h4>National County Meet</h4>
+                    </div>
+                </a>
+            </div>
+            <!-- Main Scoreboard -->
+            <div class="col-md-9">
+                <div class="background">
+                    <div class="main-navbtn d-flex bg-light justify-content-between">
+                        <button class="btn btn-hover" onclick="goBack()">Back</button>
+                        <a href="/statistics"><button class="btn btn-hover">Game Stats</button></a>
+                    </div>
+                </div>
+                
+                <div class="container my-4">
+                    <!-- Match Header -->
+                    <div class="match-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <!-- Home Team Logo (Base64 image) -->
+                            <img src="<%= home_logo %>" alt="<%= home_team_name %> Logo" class="team-logo me-2">
+                            <div><%= home_team_name %></div>
+                        </div>
+                        <div class="score text-center">
+                            <%= home_score %> - <%= away_score %>
+                            <div class="small">Full Time</div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <!-- Away Team Logo (Base64 image) -->
+                            <img src="<%= away_logo %>" alt="<%= away_team_name %> Logo" class="team-logo me-2">
+                            <div><%= away_team_name %></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabs Section -->
+                    <ul class="nav nav-tabs my-3" id="matchTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a href="/statistices?match_id=<%= match_id %>">
+                                <button class="nav-link active" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab" aria-controls="events" aria-selected="true">Events</button>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="commentary-tab" data-bs-toggle="tab" data-bs-target="#commentary" type="button" role="tab" aria-controls="commentary" aria-selected="false">Commentary</button>
+                        </li>
+                    </ul>
+        
+                    <div class="tab-content" id="matchTabContent">
+                        <!-- Events Tab -->
+                        <div class="tab-pane fade show active" id="events" role="tabpanel" aria-labelledby="events-tab">
+                            <% events.forEach(event => { %>
+                                <div class="event-row d-flex">
+                                    <div class="event-time"><%= event.event_time %>'</div>
+                                    
+                                    <% if (event.event_type === 'goal') { %>
+                                        <div class="goal-event">
+                                            <div>⚽ <span class="goal"><%= event.player_name %></span></div>
+                                            <div><span class="goal team text-muted"><%= event.team_name %></span></div>
+                                            <span class="assist"><%= event.description || 'Assist: None' %></span>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <% if (event.event_type === 'yellow_card') { %>
+                                        <div class="yellow-card-event">
+                                            <div><span class="yellow-card"><%= event.player_name %></span> 🟨</div>
+                                            <div><span class="yellow-card team text-muted"><%= event.team_name %></span></div>
+                                        </div>
+                                    <% } %>
+                                    
+                                    <% if (event.event_type === 'red_card') { %>
+                                        <div class="red-card-event">
+                                            <div><span class="red-card"><%= event.player_name %></span> 🟥</div>
+                                            <div><span class="red-card team text-muted"><%= event.team_name %></span></div>
+                                        </div>
+                                    <% } %>
+
+                                    <!-- <div class="substitution-event">
+                                        <div><span class="substitution">name of player leaving the field</span> </div>
+                                        <div><span class="substitution team text-muted">name of player</span></div>
+                                    </div> -->
+                    
+                                    <div class="goal-score">
+                                        <div class="home-score"><%= home_score %> - </div>
+                                        <div class="away-score"><%= away_score %></div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    
+                    </div>
+                        <!-- Commentary Tab -->
+                        <div class="tab-pane fade" id="commentary" role="tabpanel" aria-labelledby="commentary-tab">
+                            <p class="text-muted">Commentary will be added soon...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="/public/assets/js/websocket.js"></script>
+     <script src="/assets/js/socket.io.js"></script> 
+     <script src="/assets/js/nav.js"></script>
+     <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+    
+  
+</body>
+</html>

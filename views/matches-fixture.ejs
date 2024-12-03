@@ -53,49 +53,50 @@
             <div class="col-md-9">
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
-                      <a href="index">  <button class="btn btn-hover">All Games</button></a>
-                       <a href="live"><button class="btn btn-hover">Live Games</button></a> 
-                        <button class="btn btn-hover">Matches</button>
-                        <a href="table"><button class="btn btn-hover">Table</button></a>
+                        <a href="/index?league_id=<%= league_id %>"><button class="btn btn-hover">Overview</button></a>
+                        <a href="/live?league_id=<%= league_id %>"><button class="btn btn-hover">Live Games</button></a>
+                        <a href="/fixture?league_id=<%= league_id %>"><button class="btn btn-hover">Matches</button></a>
+                        <a href="/table?league_id=<%= league_id %>"><button class="btn btn-hover">Table</button></a>
                     </div>
                 </div>
 
                         <!-- Fixtures and Results Tabs -->
                 <div class="tabs-container d-flex justify-content-start mt-3 mb-3">
-                    <button class="btn btn-tab active-tab">Fixtures</button>
-                    <a href="result"> <button class="btn btn-tab">Results</button></a>
+                    <a href="/fixture?league_id=<%= league_id %>">  <button class="btn btn-tab active-tab">Fixtures</button></a>
+                    <a href="/result?league_id=<%= league_id %>"><button class="btn btn-tab">Results</button></a> 
                 </div>
 
-                            <!-- Fixture Section -->
+                       <!-- Fixture Section -->
                 <div class="league-list">
                     <% matches.forEach((match, index) => { %>
                         <div class="division-img">
-                            <!-- <img src="/img/orange-f.jpeg" alt=""> -->
+                            <!-- Display the league name -->
                             <div class="league-title mt-4"><%= match.league_name %></div>
                         </div>
 
                         <!-- Each match item gets a unique ID to make it easier to target -->
                         <div class="match-item" id="match-<%= match.match_id %>">
                             <div class="match-time">
-                                <span><%= new Date(match.start_time).toLocaleDateString() %></span> <br>
+                                <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span><br>
                                 <span><%= new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></span>
                             </div>
                             <div class="teams">
                                 <div class="team">
-                                    <img src="<%= match.home_team_logo %>" alt="">
+                                    <img src="<%= match.home_team_logo %>" alt="<%= match.home_team_name %> Logo">
                                     <span><%= match.home_team_name %></span>
                                 </div>
                                 <div class="team">
-                                    <img src="<%= match.away_team_logo %>" alt="">
+                                    <img src="<%= match.away_team_logo %>" alt="<%= match.away_team_name %> Logo">
                                     <span><%= match.away_team_name %></span>
                                 </div>
                             </div>
                             <div class="scores">
-                                <i class="bi bi-star"></i>
+                                <i class="bi bi-star"></i> <!-- Placeholder for in-progress or upcoming match -->
                             </div>
                         </div>
                     <% }) %>
                 </div>
+
             </div>
             </div>
         </div>

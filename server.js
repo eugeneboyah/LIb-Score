@@ -61,69 +61,12 @@ io.on('connection', (socket) => {
     });
 });
 
-// cron.schedule('* * * * *', () => {
-//     const query = `
-//         SELECT match_id, start_time, status, home_team_id, away_team_id, league_id
-//         FROM Matches
-//         WHERE status = 'ongoing'
-//     `;
-
-//     db.all(query, [], (err, matches) => {
-//         if (err) {
-//             console.error("Error fetching matches:", err.message);
-//             return;
-//         }
-
-//         const now = Date.now();
-//         matches.forEach(match => {
-//             const matchStartTime = new Date(match.start_time).getTime();
-//             const elapsedMinutes = Math.floor((now - matchStartTime) / 60000);
-
-//             if (elapsedMinutes >= 90 && match.status === 'ongoing') {
-//                 const updateQuery = `UPDATE Matches SET status = 'completed' WHERE match_id = ?`;
-//                 db.run(updateQuery, [match.match_id], (updateErr) => {
-//                     if (updateErr) {
-//                         console.error('Error updating match status:', updateErr.message);
-//                     } else {
-//                         // Emit event with updated match data
-//                         io.emit('matchStatusUpdate', {
-//                             match_id: match.match_id,
-//                             status: 'completed',
-//                             home_team_id: match.home_team_id,
-//                             away_team_id: match.away_team_id,
-//                             league_id: match.league_id,
-//                         });
-//                     }
-//                 });
-//             }
-//         });
-//     });
-// });
-
-
-// const broadcastUpdates = () => {
-//     const liveQuery = `
-//         SELECT * FROM Matches WHERE status = 'ongoing';
-//     `;
-//     db.all(liveQuery, [], (err, matches) => {
-//         if (!err) {
-//             wss.clients.forEach(client => {
-//                 if (client.readyState === WebSocket.OPEN) {
-//                     client.send(JSON.stringify(matches));
-//                 }
-//             });
-//         }
-//     });
-// };
-
-// // Call this function every minute
-// setInterval(broadcastUpdates, 60000);
-
 // Route handlers
 // app.use('/', indexRouter);
-app.get('/index', (req, res) => {
+app.get('/index', async (req, res) => {
     const league_id = req.query.league_id || 1; // Default to league_id 1
 
+    // Queries
     const nextMatchQuery = `
         SELECT Matches.match_id, Matches.start_time, Matches.status,
                home_team.team_name AS home_team_name, home_team.logo AS home_team_logo,
@@ -162,82 +105,70 @@ app.get('/index', (req, res) => {
         LIMIT 4
     `;
 
-    db.all(nextMatchQuery, [league_id], (err, nextMatch) => {
-        if (err) {
-            console.error("Error retrieving next match:", err);
-            return res.status(500).send("Error retrieving next match.");
-        }
+    try {
+        // Fetch data using async/await
+        const nextMatch = await dbQuery(nextMatchQuery, [league_id]);
+        const fixtures = await dbQuery(fixturesQuery, [league_id]);
+        const results = await dbQuery(resultsQuery, [league_id]);
 
-        // Convert binary logo data for next match
+        // Convert logos from binary to Base64
         if (nextMatch.length) {
-            const match = nextMatch[0];
-            if (match.home_team_logo) {
-                match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
-            }
-            if (match.away_team_logo) {
-                match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
-            }
+            convertLogos(nextMatch);
         }
+        convertLogos(fixtures);
+        convertLogos(results);
 
-        db.all(fixturesQuery, [league_id], (err, fixtures) => {
-            if (err) {
-                console.error("Error retrieving fixtures:", err);
-                return res.status(500).send("Error retrieving fixtures.");
-            }
+        // Render the index page
+        res.render('index', {
+            league_id,
+            nextMatch: nextMatch.length ? nextMatch[0] : null,
+            fixtures,
+            results,
+        });
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        res.status(500).send('Error retrieving data.');
+    }
+});
 
-            // Convert binary logo data for fixtures
-            fixtures.forEach(match => {
-                if (match.home_team_logo) {
-                    match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
-                }
-                if (match.away_team_logo) {
-                    match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
-                }
-            });
-
-            db.all(resultsQuery, [league_id], (err, results) => {
-                if (err) {
-                    console.error("Error retrieving results:", err);
-                    return res.status(500).send("Error retrieving results.");
-                }
-
-                // Convert binary logo data for results
-                results.forEach(match => {
-                    if (match.home_team_logo) {
-                        match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
-                    }
-                    if (match.away_team_logo) {
-                        match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
-                    }
-                });
-
-                res.render('index', {
-                    league_id,
-                    nextMatch: nextMatch.length ? nextMatch[0] : null,
-                    fixtures,
-                    results,
-                });
-            });
+// Helper function to query the database with Promises
+function dbQuery(query, params) {
+    return new Promise((resolve, reject) => {
+        db.all(query, params, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
         });
     });
-});
+}
+
+// Helper function to convert binary logos to Base64
+function convertLogos(matches) {
+    matches.forEach(match => {
+        match.home_team_logo = match.home_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`
+            : null;
+        match.away_team_logo = match.away_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`
+            : null;
+    });
+}
 
 
 
 
 // Route to render the forms with leagues
-app.get('/register', (req, res) => {
+app.get('/team', (req, res) => {
     db.all(`SELECT * FROM Leagues`, (err, leagues) => {
         if (err) {
             console.error(err.message);
             return res.status(500).send("Error fetching leagues");
         }
-        res.render('form', { leagues });
+        res.render('addTeam', { leagues });
     });
 });
 
 // Route for adding a team
-app.post('/register/team', upload.single('logo_url'), (req, res) => {
+app.post('team', upload.single('logo_url'), (req, res) => {
     console.log('Request body:', req.body);
     console.log('Uploaded file:', req.file);
     
@@ -280,9 +211,17 @@ app.post('/register/team', upload.single('logo_url'), (req, res) => {
 // Run the check every minute
 setInterval(updateMatchStatus, 60000);
 
-
+app.get('/match', (req, res) => {
+    db.all(`SELECT * FROM Leagues`, (err, leagues) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Error fetching leagues");
+        }
+        res.render('addMatch', { leagues });
+    });
+});
 // Route for adding a match
-app.post('/register/match', (req, res) => {
+app.post('/match', (req, res) => {
     const { home_team_id, away_team_id, league_id, start_time, status } = req.body;
 
     const query = `INSERT INTO Matches (home_team_id, away_team_id, league_id, start_time, status) VALUES (?, ?, ?, ?, ?)`;
@@ -295,8 +234,11 @@ app.post('/register/match', (req, res) => {
     });
 });
 
+app.get('/score', (req, res) => {
+    res.render('addScore'); 
+});
 // Route to handle updating scores
-app.post('/register/score', (req, res) => {
+app.post('/score', (req, res) => {
     const { match_id, home_score, away_score } = req.body;
     const currentTime = new Date().toISOString();  // Get current timestamp
 
@@ -344,10 +286,11 @@ app.post('/register/score', (req, res) => {
     });
 });
 
-
-
+app.get('/player', (req, res) => {
+    res.render('addPlayer'); 
+});
 // Route for adding a player
-app.post('/register/player', (req, res) => {
+app.post('/player', (req, res) => {
     const { team_id, player_name, position, nationality, jersey_number } = req.body;
 
     const query = `INSERT INTO Players (team_id, player_name, position, nationality, jersey_number) VALUES (?, ?, ?, ?, ?)`;
@@ -360,8 +303,11 @@ app.post('/register/player', (req, res) => {
     });
 });
 
+app.get('/event', (req, res) => {
+    res.render('addMatchEvent'); 
+});
 // Route for adding a match event
-app.post('/register/event', (req, res) => {
+app.post('/event', (req, res) => {
     const { match_id, player_id, team_id, event_type, event_time } = req.body;
 
     const query = `INSERT INTO MatchEvents (match_id, player_id, team_id, event_type, event_time) VALUES (?, ?, ?, ?, ?)`;
@@ -373,44 +319,69 @@ app.post('/register/event', (req, res) => {
         res.send("Match event added successfully");
     });
 });
+app.get('/database', (req, res) => {
+    res.render('database-tables'); 
+});
 
 // Route to fetch ongoing matches for the live game page
-app.get('/live', (req, res) => {
+app.get('/live', async (req, res) => {
     const league_id = req.query.league_id || 1; // Default to 1 if not provided
 
+    // Query for live matches including scores
     const liveMatchesQuery = `
         SELECT 
             Matches.match_id, Matches.start_time, Matches.status,
             home_team.team_name AS home_team_name, home_team.logo AS home_team_logo,
-            away_team.team_name AS away_team_name, away_team.logo AS away_team_logo
+            away_team.team_name AS away_team_name, away_team.logo AS away_team_logo,
+            Scores.home_score, Scores.away_score
         FROM Matches
         JOIN Teams AS home_team ON Matches.home_team_id = home_team.team_id
         JOIN Teams AS away_team ON Matches.away_team_id = away_team.team_id
+        LEFT JOIN Scores ON Matches.match_id = Scores.match_id
         WHERE Matches.league_id = ? AND Matches.status = 'ongoing'
     `;
 
-    db.all(liveMatchesQuery, [league_id], (err, liveMatches) => {
-        if (err) {
-            console.error(err.message);
-            return res.status(500).send("Error retrieving live matches.");
-        }
+    try {
+        // Fetch live matches
+        const liveMatches = await dbQuery(liveMatchesQuery, [league_id]);
 
-        // Convert binary logo data for live matches
-        liveMatches.forEach(match => {
-            if (match.home_team_logo) {
-                match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
-            }
-            if (match.away_team_logo) {
-                match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
-            }
-        });
+        // Convert binary logos to Base64
+        convertLogos(liveMatches);
 
+        // Render the live game page
         res.render('live-game', {
             matches: liveMatches,
             league_id
         });
-    });
+    } catch (error) {
+        console.error('Error retrieving live matches:', error);
+        res.status(500).send('Error retrieving live matches.');
+    }
 });
+
+
+
+// Helper function to query the database with Promises
+function dbQuery(query, params) {
+    return new Promise((resolve, reject) => {
+        db.all(query, params, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
+}
+
+// Helper function to convert binary logos to Base64
+function convertLogos(matches) {
+    matches.forEach(match => {
+        match.home_team_logo = match.home_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`
+            : null;
+        match.away_team_logo = match.away_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`
+            : null;
+    });
+}
 
 
 
@@ -464,24 +435,19 @@ setInterval(() => {
 
 
 // Route to get match fixture
-app.get('/fixture', (req, res) => {
+app.get('/fixture', async (req, res) => {
     const leagueId = req.query.league_id || 1; // Default to league 1 if not specified
-    const currentTime = new Date(); // Current server time
+    const currentTime = new Date().toISOString(); // Current server time in ISO format
 
     // Query to update the status of matches whose start time has passed
-    const updateStatusQuery = 
-        `UPDATE Matches
+    const updateStatusQuery = `
+        UPDATE Matches
         SET status = 'ongoing'
-        WHERE status = 'scheduled' AND start_time <= ?`;
+        WHERE status = 'scheduled' AND start_time <= ?
+    `;
 
-    db.run(updateStatusQuery, [currentTime.toISOString()], function(err) {
-        if (err) {
-            console.error(err.message);
-        }
-    });
-
-    // Query to get fixtures for the selected league
-    const query = `
+    // Query to fetch scheduled fixtures for the selected league
+    const fixturesQuery = `
         SELECT 
             Matches.match_id, Matches.start_time, Matches.status, 
             home_team.team_name AS home_team_name, 
@@ -495,39 +461,103 @@ app.get('/fixture', (req, res) => {
         JOIN Leagues ON Matches.league_id = Leagues.league_id
         WHERE Matches.status = 'scheduled' AND Matches.league_id = ?
     `;
-    
-    db.all(query, [leagueId], (err, matches) => {
-        if (err) {
-            console.error(err.message);
-            return res.status(500).send("Error fetching fixtures.");
-        }
 
-        // Convert binary logo data for each match to Base64
-        matches.forEach(match => {
-            if (match.home_team_logo) {
-                match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
-            }
-            if (match.away_team_logo) {
-                match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
-            }
-        });
+    try {
+        // Update match statuses
+        await dbRun(updateStatusQuery, [currentTime]);
 
+        // Fetch fixtures for the league
+        const matches = await dbQuery(fixturesQuery, [leagueId]);
+
+        // Convert binary logos to Base64
+        convertLogos(matches);
+
+        // Render the fixture page
         res.render('matches-fixture', {
-            matches: matches,
+            matches,
             league_id: leagueId
         });
-    });
+    } catch (error) {
+        console.error('Error handling /fixture route:', error);
+        res.status(500).send('Error fetching fixtures.');
+    }
 });
 
+// Helper function to execute a database query with Promises
+function dbQuery(query, params) {
+    return new Promise((resolve, reject) => {
+        db.all(query, params, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
+}
+
+// Helper function to execute a database update with Promises
+function dbRun(query, params) {
+    return new Promise((resolve, reject) => {
+        db.run(query, params, function (err) {
+            if (err) return reject(err);
+            resolve(this);
+        });
+    });
+}
+
+// Helper function to convert binary logos to Base64
+function convertLogos(matches) {
+    matches.forEach(match => {
+        match.home_team_logo = match.home_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`
+            : null;
+        match.away_team_logo = match.away_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`
+            : null;
+    });
+}
+
+
+// Helper function to execute a database query with Promises
+function dbQuery(query, params) {
+    return new Promise((resolve, reject) => {
+        db.all(query, params, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
+}
+
+// Helper function to execute a database update with Promises
+function dbRun(query, params) {
+    return new Promise((resolve, reject) => {
+        db.run(query, params, function (err) {
+            if (err) return reject(err);
+            resolve(this);
+        });
+    });
+}
+
+// Helper function to convert binary logos to Base64
+function convertLogos(matches) {
+    matches.forEach(match => {
+        match.home_team_logo = match.home_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`
+            : null;
+        match.away_team_logo = match.away_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`
+            : null;
+    });
+}
 
 
 
 
-app.get('/result', (req, res) => {
+
+
+app.get('/result', async (req, res) => {
     const leagueId = req.query.league_id || 1; // Default to league 1 if not specified
 
-    // Query to get results for the selected league
-    const query = `
+    // Query to fetch completed matches and their results for the selected league
+    const resultsQuery = `
         SELECT 
             Matches.match_id, Matches.start_time, Matches.status, 
             home_team.team_name AS home_team_name, 
@@ -543,11 +573,70 @@ app.get('/result', (req, res) => {
         LEFT JOIN Scores ON Matches.match_id = Scores.match_id
         WHERE Matches.status = 'completed' AND Matches.league_id = ?
     `;
-    
+
+    try {
+        // Fetch completed matches and their scores
+        const matches = await dbQuery(resultsQuery, [leagueId]);
+
+        // Convert binary logos to Base64
+        convertLogos(matches);
+
+        // Render the results page
+        res.render('matches-result', {
+            matches,
+            league_id: leagueId
+        });
+    } catch (error) {
+        console.error('Error handling /result route:', error);
+        res.status(500).send('Error fetching results.');
+    }
+});
+
+// Helper function to execute a database query with Promises
+function dbQuery(query, params) {
+    return new Promise((resolve, reject) => {
+        db.all(query, params, (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
+}
+
+// Helper function to convert binary logos to Base64
+function convertLogos(matches) {
+    matches.forEach(match => {
+        match.home_team_logo = match.home_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`
+            : null;
+        match.away_team_logo = match.away_team_logo
+            ? `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`
+            : null;
+    });
+}
+
+
+app.get('/table', (req, res) => {
+    const leagueId = req.query.league_id || 1; // Default to league ID 1
+
+    // Query to fetch matches, scores, and team details for the specified league
+    const query = `
+        SELECT 
+            Matches.match_id,
+            Matches.home_team_id, Matches.away_team_id, Matches.status,
+            Scores.home_score, Scores.away_score,
+            ht.team_name AS home_team_name, ht.logo AS home_team_logo,
+            at.team_name AS away_team_name, at.logo AS away_team_logo
+        FROM Matches
+        JOIN Scores ON Matches.match_id = Scores.match_id
+        JOIN Teams ht ON Matches.home_team_id = ht.team_id
+        JOIN Teams at ON Matches.away_team_id = at.team_id
+        WHERE Matches.league_id = ? AND Matches.status = 'completed';
+    `;
+
     db.all(query, [leagueId], (err, matches) => {
         if (err) {
-            console.error(err.message);
-            return res.status(500).send("Error fetching results.");
+            console.error(err.message); // Log errors if any
+            return res.status(500).send("Error fetching league data."); // Send error response
         }
 
         // Convert binary logo data for each match to Base64
@@ -560,16 +649,154 @@ app.get('/result', (req, res) => {
             }
         });
 
-        res.render('matches-result', {
-            matches: matches,
-            league_id: leagueId
+        // Initialize an object to store stats for each team
+        const stats = {};
+
+        // Loop through all matches to calculate stats
+        matches.forEach(match => {
+            const {
+                home_team_id,
+                away_team_id,
+                home_team_name,
+                away_team_name,
+                home_team_logo,
+                away_team_logo,
+                home_score,
+                away_score
+            } = match;
+
+            // Ensure stats object has home and away team entries
+            if (!stats[home_team_id]) {
+                stats[home_team_id] = {
+                    team_id: home_team_id,
+                    team_name: home_team_name,
+                    logo: home_team_logo,
+                    P: 0, W: 0, D: 0, L: 0, PTS: 0
+                };
+            }
+            if (!stats[away_team_id]) {
+                stats[away_team_id] = {
+                    team_id: away_team_id,
+                    team_name: away_team_name,
+                    logo: away_team_logo,
+                    P: 0, W: 0, D: 0, L: 0, PTS: 0
+                };
+            }
+
+            // Update stats based on match result
+            stats[home_team_id].P += 1; // Increment games played for home team
+            stats[away_team_id].P += 1; // Increment games played for away team
+
+            if (home_score > away_score) { // Home team wins
+                stats[home_team_id].W += 1;
+                stats[away_team_id].L += 1;
+                stats[home_team_id].PTS += 3; // 3 points for a win
+            } else if (home_score < away_score) { // Away team wins
+                stats[away_team_id].W += 1;
+                stats[home_team_id].L += 1;
+                stats[away_team_id].PTS += 3; // 3 points for a win
+            } else { // Draw
+                stats[home_team_id].D += 1;
+                stats[away_team_id].D += 1;
+                stats[home_team_id].PTS += 1; // 1 point for a draw
+                stats[away_team_id].PTS += 1;
+            }
+        });
+
+        // Convert the stats object to an array for easier processing in the view
+        const statsArray = Object.values(stats);
+
+        // Sort the stats array by points (descending), wins, then alphabetical team names
+        statsArray.sort((a, b) => {
+            if (b.PTS !== a.PTS) return b.PTS - a.PTS; // Sort by points first
+            if (b.W !== a.W) return b.W - a.W; // Sort by wins next
+            return a.team_name.localeCompare(b.team_name); // Sort alphabetically by team name
+        });
+
+        // Render the 'games-table' view and pass the stats array
+        res.render('games-table', { stats: statsArray, league_id: leagueId });
+    });
+});
+
+app.get('/statistices', (req, res) => {
+    const match_id = req.query.match_id;
+
+    if (!match_id) {
+        console.error("Match ID is missing in the query.");
+        return res.status(400).send("Match ID is required.");
+    }
+
+    console.log("Fetching data for Match ID:", match_id);
+
+    // Fetch match details including team names, logos, and scores
+    db.all(`
+        SELECT m.match_id, t1.team_name AS home_team, t2.team_name AS away_team, 
+               ms.home_score, ms.away_score, m.league_id, 
+               t1.logo AS home_team_logo, t2.logo AS away_team_logo
+        FROM Matches m
+        JOIN Teams t1 ON m.home_team_id = t1.team_id
+        JOIN Teams t2 ON m.away_team_id = t2.team_id
+        JOIN Scores ms ON m.match_id = ms.match_id
+        WHERE m.match_id = ?`, [match_id], (err, matchDetails) => {
+        if (err) {
+            console.error("Error fetching match details:", err);
+            return res.status(500).send('Error fetching match details');
+        }
+
+        if (!matchDetails || matchDetails.length === 0) {
+            console.log('No match found for match_id:', match_id);
+            return res.status(404).send('Match not found');
+        }
+
+        const match = matchDetails[0]; // Assuming only one match is returned
+
+        // Convert binary logo data to Base64
+        if (match.home_team_logo) {
+            match.home_team_logo = `data:image/png;base64,${Buffer.from(match.home_team_logo).toString('base64')}`;
+        }
+        if (match.away_team_logo) {
+            match.away_team_logo = `data:image/png;base64,${Buffer.from(match.away_team_logo).toString('base64')}`;
+        }
+
+        // Fetch events for the match, including player names and team names
+        db.all(`
+            SELECT me.event_time, me.event_type, p.player_name, me.description, t.team_name
+            FROM MatchEvents me
+            JOIN Players p ON me.player_id = p.player_id
+            JOIN Teams t ON me.team_id = t.team_id
+            WHERE me.match_id = ?`, [match_id], (err, events) => {
+            if (err) {
+                console.error("Error fetching events for match_id:", match_id, "Error:", err);
+                return res.status(500).send('Error fetching events');
+            }
+
+            console.log("Fetched events:", events); // Log events to verify the data
+
+            // Pass match and events data to the view
+            res.render('stats', {
+                home_team_name: match.home_team,
+                away_team_name: match.away_team,
+                home_score: match.home_score,
+                away_score: match.away_score,
+                home_logo: match.home_team_logo,
+                away_logo: match.away_team_logo,
+                match_id: match.match_id,
+                events: events // Pass events to the view
+            });
         });
     });
 });
 
-app.get('/table', (req, res) => {
-    res.render('games-table'); 
-});
+
+
+
+
+
+
+
+
+
+
 
 
 app.get('/billing', (req, res) => {

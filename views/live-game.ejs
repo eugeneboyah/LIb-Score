@@ -51,10 +51,10 @@
             <div class="col-md-9">
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
-                      <a href="index">  <button class="btn btn-hover">All Games</button></a>
-                        <button class="btn btn-hover">Live Games</button>
-                        <a href="fixture"><button class="btn btn-hover">Matches</button></a>
-                        <button class="btn btn-hover">Table</button>
+                        <a href="/index?league_id=<%= league_id %>"><button class="btn btn-hover">Overview</button></a>
+                        <a href="/live?league_id=<%= league_id %>"><button class="btn btn-hover">Live Games</button></a>
+                        <a href="/fixture?league_id=<%= league_id %>"><button class="btn btn-hover">Matches</button></a>
+                        <a href="/table?league_id=<%= league_id %>"><button class="btn btn-hover">Table</button></a>
                     </div>
                 </div>
 
@@ -79,11 +79,11 @@
                             
                             <div class="teams">
                                 <div class="team">
-                                    <img src="<%= match.home_team_logo || '/img/default-logo.png' %>" alt="<%= match.home_team_name %> Logo">
+                                    <img src="<%= match.home_team_logo || '/img/default-logo.png' %>" alt="">
                                     <span><%= match.home_team_name %></span>
                                 </div><br>
                                 <div class="team">
-                                    <img src="<%= match.away_team_logo || '/img/default-logo.png' %>" alt="<%= match.away_team_name %> Logo">
+                                    <img src="<%= match.away_team_logo || '/img/default-logo.png' %>" alt="">
                                     <span><%= match.away_team_name %></span>
                                 </div>
                             </div>

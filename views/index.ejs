@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <%- include('partlies/head') %>
-    <title>Sports Score Interface</title>
+    <title>Overview</title>
 
 </head>
 <body>
@@ -44,6 +44,7 @@
                     </div>
                 </a>
                 
+                
             </div>
 
             <!-- Main Scoreboard -->
@@ -52,11 +53,13 @@
             <div class="col-md-9">
                 <div class="background">
                     <div class="main-navbtn d-flex bg-light justify-content-between">
-                        <a href="index"><button class="btn btn-hover">All Games</button></a>
-                       <a href="live"><button class="btn btn-hover">Live Games</button></a>
-                       <a href="fixture"><button class="btn btn-hover">Matches</button></a>
-                       <a href="table"><button class="btn btn-hover">Table</button></a>
+                        <a href="/index?league_id=<%= league_id %>"><button class="btn btn-hover">Overview</button></a>
+                        <a href="/live?league_id=<%= league_id %>"><button class="btn btn-hover">Live Games</button></a>
+                        <a href="/fixture?league_id=<%= league_id %>"><button class="btn btn-hover">Matches</button></a>
+                        <a href="/player-stats?league_id=<%= league_id %>"><button class="btn btn-hover">Player stats</button></a>
+                        <a href="/table?league_id=<%= league_id %>"><button class="btn btn-hover">Table</button></a>
                     </div>
+                    
                 </div>
 
                 <!-- Next Match -->
@@ -116,26 +119,28 @@
                 <div class="league-list">
                     <h6 class="text-muted mt-2">RESULT</h6>
                     <% results.forEach(match => { %>
-                        <div class="match-item">
-                            <div class="match-time">
-                                <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span> <br>
-                                <span class="status"><%= match.status %></span>
-                            </div>
-                            <div class="teams">
-                                <div class="team">
-                                    <img src="<%= match.home_team_logo %>" alt="">
-                                    <span><%= match.home_team_name %></span>
+                        <a href="/statistics?match_id=<%= match.match_id %>">
+                            <div class="match-item">
+                                <div class="match-time">
+                                    <span><%= new Date(match.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) %></span> <br>
+                                    <span class="status"><%= match.status %></span>
                                 </div>
-                                <div class="team">
-                                    <img src="<%= match.away_team_logo %>" alt="">
-                                    <span><%= match.away_team_name %></span>
+                                <div class="teams">
+                                    <div class="team">
+                                        <img src="<%= match.home_team_logo %>" alt="">
+                                        <span><%= match.home_team_name %></span>
+                                    </div>
+                                    <div class="team">
+                                        <img src="<%= match.away_team_logo %>" alt="">
+                                        <span><%= match.away_team_name %></span>
+                                    </div>
+                                </div>
+                                <div class="scores">
+                                    <div class="score"><%= match.home_score || 0 %></div>
+                                    <div class="score"><%= match.away_score || 0 %></div>
                                 </div>
                             </div>
-                            <div class="scores">
-                                <div class="score"><%= match.home_score || 0 %></div>
-                                <div class="score"><%= match.away_score || 0 %></div>
-                            </div>
-                        </div>
+                        </a>
                     <% }) %>
                 </div>
 

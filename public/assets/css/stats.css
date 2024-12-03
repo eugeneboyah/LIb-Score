@@ -1,0 +1,122 @@
+body {
+    background-color: #f8f9fa;
+  }
+  .match-header {
+    background-color: #0044cc;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  .team-logo {
+    height: 50px;
+  }
+  .score {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  .nav-tabs .nav-link.active {
+    background-color: white;
+    color: white;
+  }
+  .event-row {
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px 0;
+  }
+  .event-row:last-child {
+    border-bottom: none;
+  }
+  .event-time {
+    font-weight: bold;
+    width: 50px;
+  }
+  .yellow-card {
+    color:black ;
+  }
+  .goal {
+    color: #28a745;
+  }
+
+  .game-score{
+    display: flex;
+  }
+  .event-type{
+    display: flex;
+    margin-left: 10rem;
+    gap: 2rem;
+
+  }
+  .home-team span{
+    margin-right: 1rem;
+  }
+  .away-team span{
+    margin-left: 1rem;
+  }
+
+  .home-goal{
+
+    margin-left: 8rem;
+    gap: 2rem;
+
+  }
+
+  .away-goal{
+    display: flex;
+    margin-left: 15rem;
+    gap: 2rem;
+
+  }
+  .assist{
+    margin-left: 2rem;
+    font-size: 12px;
+  }
+  .goal-score{
+    display: flex;
+   margin-left: 1rem;
+   margin-top: 0.5rem;
+  }
+.away-score{
+  display: flex;
+}
+
+.halfTime-score {
+    display: flex;
+    margin-left: 15rem;
+}
+.fullTime-score{
+    display: flex;
+    margin-left: 15rem;
+}
+.event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-event {
+  color: #007bff; /* Home team color */
+}
+
+.away-event {
+  color: #dc3545; /* Away team color */
+}
+
+.goal {
+  font-weight: bold;
+  color: green;
+}
+
+.yellow-card {
+  font-weight: bold;
+  color: gold;
+}
+
+.red-card {
+  font-weight: bold;
+  color: red;
+}
+
+.assist {
+  font-style: italic;
+  font-size: 0.9em;
+  color: gray;
+}
