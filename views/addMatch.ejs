@@ -328,67 +328,63 @@
               </div>
               <div class="col-xl-6">
 
-                <form method="POST" action="/match" class="card-body p-md-5 text-black" enctype="multipart/form-data">
-                  <input type="hidden" name="form_type" value="add_match">
+                <div id="response-message"></div>
                 
-                  <h3 class="mb-5 text-uppercase">Match registration Form</h3>
-  
-                  <div class="row">
-                    <div class="col-md-12 mb-4">
-                      <div data-mdb-input-init class="form-outline">
-                        <label for="homeTeamId" class="form-label">Home Team ID</label>
-                        <input type="number" class="form-control form-control-lg" id="homeTeamId" name="home_team_id" required>
-                        
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-12 mb-4">
-                      <div data-mdb-input-init class="form-outline">
-                        <label for="awayTeamId" class="form-label">Away Team ID</label>
-                        <input type="number" class="form-control form-control-lg" id="awayTeamId" name="away_team_id" required>
-                        
-                      </div>
-                    </div>
-                  </div>
-
+                <form method="POST" action="/match" id="match-form" class="card-body p-md-5 text-black" enctype="multipart/form-data">
+                  <input type="hidden" name="form_type" value="add_match">
+              
+                  <h3 class="mb-5 text-uppercase">Match Registration Form</h3>
+              
                   <div class="mb-3">
-                    <label for="leagueIdMatch" class="form-label">League</label>
-                    <select class="form-select" id="leagueIdMatch" name="league_id" required>
-                        <% leagues.forEach(league => { %>
-                            <option value="<%= league.league_id %>"><%= league.league_name %></option>
-                        <% }) %>
+                      <label for="leagueIdMatch" class="form-label">League</label>
+                      <select class="form-select" id="leagueIdMatch" name="league_id" required>
+                          <option value="">Select League</option>
+                          <% leagues.forEach(league => { %>
+                              <option value="<%= league.league_id %>"><%= league.league_name %></option>
+                          <% }) %>
+                      </select>
+                  </div>
+              
+                  <div class="mb-3">
+                      <label for="homeTeam" class="form-label">Home Team</label>
+                      <select class="form-select" id="homeTeam" name="home_team_id" required>
+                        <option value="">Select Home Team</option>
                     </select>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-12 mb-4">
-                    <div data-mdb-input-init class="form-outline">
-                      <label for="startTime" class="form-label">Start Time</label>
-                      <input type="datetime-local" class="form-control form-control-lg" id="startTime" name="start_time" required>
-                      
-                    </div>
                   </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-12 mb-4">
-                  <label for="status" class="form-label">Status</label>
-                  <select class="form-select" id="status" name="status">
-                      <option value="scheduled">Scheduled</option>
-                      <option value="ongoing">Ongoing</option>
-                      <option value="completed">Completed</option>
-                  </select>
+              
+                  <div class="mb-3">
+                      <label for="awayTeam" class="form-label">Away Team</label>
+                      <select class="form-select" id="awayTeam" name="away_team_id" required>
+                        <option value="">Select Away Team</option>
+                    </select>
                   </div>
-              </div>
-                  
+              
+                  <div class="row">
+                      <div class="col-md-12 mb-4">
+                          <div data-mdb-input-init class="form-outline">
+                              <label for="startTime" class="form-label">Start Time</label>
+                              <input type="datetime-local" class="form-control" id="startTime" name="start_time" required>
+                          </div>
+                      </div>
+                  </div>
+              
+                  <div class="row">
+                      <div class="col-md-12 mb-4">
+                          <label for="status" class="form-label">Status</label>
+                          <select class="form-select" id="status" name="status" required>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                      </div>
+                  </div>
+              
                   <div class="d-flex justify-content-end pt-3">
-                    <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-light btn-lg">Reset all</button>
-                    <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg ms-2">Submit Match</button>
+                      <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-light btn-lg">Reset all</button>
+                      <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg ms-2">Submit Match</button>
                   </div>
-  
-                </form>
+              </form>
+              
               </div>
             </div>
           </div>
@@ -476,6 +472,63 @@
       }
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
+
+    document.getElementById('leagueIdMatch').addEventListener('change', async function() {
+    const leagueId = this.value;
+
+    if (!leagueId) {
+        console.log("No league selected");
+        document.getElementById('homeTeam').innerHTML = '<option value="">Select Home Team</option>';
+        document.getElementById('awayTeam').innerHTML = '<option value="">Select Away Team</option>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/teams/${leagueId}`);
+        const teams = await response.json();
+
+        console.log("Teams fetched:", teams); // Debugging line
+
+        const options = teams.map(team => `<option value="${team.team_id}">${team.team_name}</option>`).join('');
+        document.getElementById('homeTeam').innerHTML = `<option value="">Select Home Team</option>${options}`;
+        document.getElementById('awayTeam').innerHTML = `<option value="">Select Away Team</option>${options}`;
+    } catch (error) {
+        console.error("Error fetching teams:", error);
+    }
+});
+
+// Handle form submission for adding a match without navigating to another page
+document.getElementById('match-form').addEventListener('submit', async function(e) {
+    e.preventDefault();  // Prevent the default form submission (page reload)
+
+    const formData = new FormData(this);  // Get form data
+
+    // Show loading message
+    const messageDiv = document.getElementById('response-message');
+    messageDiv.innerHTML = '<div class="alert alert-info">Submitting match...</div>';  // Show loading message
+
+    try {
+        const response = await fetch('/match', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();  // Parse JSON response from the server
+
+        // Display success or error message
+        if (response.ok) {
+            messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+        } else {
+            messageDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-danger">An error occurred while adding the match.</div>';
+    }
+});
+
+
+
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

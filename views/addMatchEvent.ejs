@@ -328,49 +328,76 @@
               </div>
               <div class="col-xl-6">
 
-                <form method="POST" action="/event" class="card-body p-md-5 text-black" enctype="multipart/form-data">
-                    <input type="hidden" name="form_type" value="add_match_event">
-                
-                  <h3 class="mb-5 text-uppercase">Add Match Event Form</h3>
-  
-                  <div class="row">
-                    <div class="col-md-12 mb-4">
-                      <div data-mdb-input-init class="form-outline">
-                        <label for="teamIdEvent" class="form-label">Team ID</label>
-                        <input type="number" class="form-control form-control-lg" id="teamIdEvent" name="team_id_event" required>
-                        
-                      </div>
-                    </div>
+                <form method="POST" action="/player" class="card-body p-md-5 text-black" enctype="multipart/form-data">
+                  <input type="hidden" name="form_type" value="add_player">
+              
+                  <h3 class="mb-5 text-uppercase">Player Registration Form</h3>
+              
+                  <!-- League Dropdown -->
+                  <div class="mb-3">
+                      <label for="leagueIdMatch" class="form-label">League</label>
+                      <select class="form-select" id="leagueIdMatch" name="league_id" required>
+                          <option value="">Select League</option>
+                          <% leagues.forEach(league => { %>
+                              <option value="<%= league.league_id %>"><%= league.league_name %></option>
+                          <% }) %>
+                      </select>
                   </div>
-
-                  <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <label for="eventType" class="form-label">Event Type</label>
-                        <select class="form-select" id="eventType" name="event_type">
-                            <option value="goal">Goal</option>
-                            <option value="yellow_card">Yellow Card</option>
-                            <option value="red_card">Red Card</option>
-                            <option value="substitution">Substitution</option>
-                        </select>
-                    </div>
-                 </div>
-
-                  <div class="row">
-                    <div class="col-md-12 mb-4">
-                      <div data-mdb-input-init class="form-outline">
-                        <label for="eventTime" class="form-label">Event Time (Minute)</label>
-                        <input type="number" class="form-control form-control-lg" id="eventTime" name="event_time" required>
-
-                      </div>
-                    </div>
+              
+                  <!-- Team Dropdown (Initially Empty) -->
+                  <div class="mb-3">
+                      <label for="teamId" class="form-label">Team</label>
+                      <select class="form-select" id="teamId" name="team_id" required>
+                          <option value="">Select Team</option>
+                      </select>
                   </div>
-
+              
+                  <!-- Player Name -->
+                  <div class="row">
+                      <div class="col-md-12 mb-4">
+                          <div data-mdb-input-init class="form-outline">
+                              <label for="playerName" class="form-label">Player Name</label>
+                              <input type="text" class="form-control form-control-lg" id="playerName" name="player_name" required>
+                          </div>
+                      </div>
+                  </div>
+              
+                  <!-- Position -->
+                  <div class="row">
+                      <div class="col-md-12 mb-4">
+                          <div data-mdb-input-init class="form-outline">
+                              <label for="position" class="form-label">Position</label>
+                              <input type="text" class="form-control form-control-lg" id="position" name="position">
+                          </div>
+                      </div>
+                  </div>
+              
+                  <!-- Nationality -->
+                  <div class="row">
+                      <div class="col-md-12 mb-4">
+                          <div data-mdb-input-init class="form-outline">
+                              <label for="nationality" class="form-label">Nationality</label>
+                              <input type="text" class="form-control form-control-lg" id="nationality" name="nationality">
+                          </div>
+                      </div>
+                  </div>
+              
+                  <!-- Jersey Number -->
+                  <div class="row">
+                      <div class="col-md-12 mb-4">
+                          <div data-mdb-input-init class="form-outline">
+                              <label for="jerseyNumber" class="form-label">Jersey Number</label>
+                              <input type="number" class="form-control form-control-lg" id="jerseyNumber" name="jersey_number" required>
+                          </div>
+                      </div>
+                  </div>
+              
                   <div class="d-flex justify-content-end pt-3">
-                    <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-light btn-lg">Reset all</button>
-                    <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg ms-2">Submit Event</button>
+                      <button type="reset" class="btn btn-light btn-lg">Reset all</button>
+                      <button type="submit" class="btn btn-primary btn-lg ms-2">Submit Player</button>
                   </div>
-  
-                </form>
+              </form>
+              
               </div>
             </div>
           </div>
@@ -458,6 +485,73 @@
       }
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
+
+
+    document.getElementById('match_id').addEventListener('change', async function () {
+    const matchId = this.value;
+    const teamDropdown = document.getElementById('team_id');
+    const playerDropdown = document.getElementById('player_id');
+
+    // Clear dropdowns
+    teamDropdown.innerHTML = '<option value="">Select Team</option>';
+    playerDropdown.innerHTML = '<option value="">Select Player</option>';
+
+    if (matchId) {
+        // Fetch teams for the selected match
+        const response = await fetch(`/player/teams/${matchId}`);
+        const teams = await response.json();
+
+        if (response.ok) {
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team.team_id;
+                option.textContent = team.team_name;
+                teamDropdown.appendChild(option);
+            });
+        } else {
+            console.error('Error fetching teams');
+        }
+    }
+});
+
+document.getElementById('team_id').addEventListener('change', async function () {
+    const teamId = this.value;
+    const playerDropdown = document.getElementById('player_id');
+
+    // Clear player dropdown
+    playerDropdown.innerHTML = '<option value="">Select Player</option>';
+
+    if (teamId) {
+        // Fetch players for the selected team
+        const response = await fetch(`/player/players/${teamId}`);
+        const players = await response.json();
+
+        if (response.ok) {
+            players.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.player_id;
+                option.textContent = player.player_name;
+                playerDropdown.appendChild(option);
+            });
+        } else {
+            console.error('Error fetching players');
+        }
+    }
+});
+
+
+    // Display response message
+    document.querySelector("form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const response = await fetch(this.action, { method: "POST", body: formData });
+        const result = await response.json();
+
+        const messageBox = document.getElementById("responseMessage");
+        messageBox.className = `alert ${result.success ? "alert-success" : "alert-danger"}`;
+        messageBox.textContent = result.message;
+        messageBox.classList.remove("d-none");
+    });     
   </script>
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

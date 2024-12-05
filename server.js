@@ -35,7 +35,7 @@ const upload = multer({
 });
 
 // Middleware to parse URL-encoded bodies (as sent by HTML forms)
-app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // Set the view engine and static files
 app.set('view engine', 'ejs');
@@ -132,14 +132,19 @@ app.get('/index', async (req, res) => {
 });
 
 // Helper function to query the database with Promises
-function dbQuery(query, params) {
-    return new Promise((resolve, reject) => {
-        db.all(query, params, (err, rows) => {
-            if (err) return reject(err);
-            resolve(rows);
-        });
+app.get('/teams/:league_id', (req, res) => {
+    const { league_id } = req.params;
+
+    const query = `SELECT team_id, team_name FROM Teams WHERE league_id = ?`;
+    db.all(query, [league_id], (err, rows) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).send("Error fetching teams");
+        }
+        res.json(rows);
     });
-}
+});
+
 
 // Helper function to convert binary logos to Base64
 function convertLogos(matches) {
@@ -153,34 +158,35 @@ function convertLogos(matches) {
     });
 }
 
-
-
-
-// Route to render the forms with leagues
+// Route to fetch teams based on selected league
 app.get('/team', (req, res) => {
-    db.all(`SELECT * FROM Leagues`, (err, leagues) => {
+    const query = `SELECT league_id, league_name FROM Leagues`; // Assuming you have a Leagues table to fetch league data
+    db.all(query, (err, leagues) => {
         if (err) {
-            console.error(err.message);
-            return res.status(500).send("Error fetching leagues");
+            console.error('Error fetching leagues:', err.message);
+            return res.status(500).send('Error fetching leagues');
         }
-        res.render('addTeam', { leagues });
+        res.render('addTeam', { leagues });  // Render the 'team-form' view, passing the leagues
     });
 });
 
+
+
+
 // Route for adding a team
-app.post('team', upload.single('logo_url'), (req, res) => {
+app.post('/team', upload.single('logo_url'), (req, res) => {
     console.log('Request body:', req.body);
     console.log('Uploaded file:', req.file);
     
     const { team_name, league_id } = req.body;
-  
+
     // Ensure a file was uploaded
     if (!req.file) {
       return res.status(400).send('Logo is required');
     }
-  
+
     const teamLogo = req.file.buffer; // Buffer containing the logo's binary data
-  
+
     const query = `INSERT INTO Teams (team_name, logo, league_id) VALUES (?, ?, ?)`;
     db.run(query, [team_name, teamLogo, league_id], (err) => {
       if (err) {
@@ -189,7 +195,8 @@ app.post('team', upload.single('logo_url'), (req, res) => {
       }
       res.send('Team added successfully');
     });
-  });
+});
+
 
   const updateMatchStatus = () => {
     const query = `
@@ -211,8 +218,9 @@ app.post('team', upload.single('logo_url'), (req, res) => {
 // Run the check every minute
 setInterval(updateMatchStatus, 60000);
 
+// Fetch leagues for the match form
 app.get('/match', (req, res) => {
-    db.all(`SELECT * FROM Leagues`, (err, leagues) => {
+    db.all('SELECT * FROM Leagues', (err, leagues) => {
         if (err) {
             console.error(err.message);
             return res.status(500).send("Error fetching leagues");
@@ -220,19 +228,35 @@ app.get('/match', (req, res) => {
         res.render('addMatch', { leagues });
     });
 });
+
 // Route for adding a match
-app.post('/match', (req, res) => {
+app.post('/match', upload.none(), (req, res) => {
+    console.log("Form Data:", req.body);  // Log the incoming form data
+
     const { home_team_id, away_team_id, league_id, start_time, status } = req.body;
 
-    const query = `INSERT INTO Matches (home_team_id, away_team_id, league_id, start_time, status) VALUES (?, ?, ?, ?, ?)`;
+    if (!home_team_id || !away_team_id) {
+        return res.status(400).json({ message: "Home and Away teams must be selected." });
+    }
+
+    console.log("Inserting into the database with values:", [home_team_id, away_team_id, league_id, start_time, status]);
+
+    // Proceed with adding match to the database
+    const query = `INSERT INTO Matches (home_team_id, away_team_id, league_id, start_time, status) 
+                   VALUES (?, ?, ?, ?, ?)`;
+
     db.run(query, [home_team_id, away_team_id, league_id, start_time, status], function(err) {
         if (err) {
-            console.error(err.message);
-            return res.status(500).send("Error adding match");
+            console.error("Error executing query:", err.message);  // Log any SQL error
+            return res.status(500).json({ message: "Error adding match" });
         }
-        res.send("Match added successfully");
+
+        console.log("Match added successfully");  // Log success
+        res.json({ message: "Match added successfully" });
     });
 });
+
+
 
 app.get('/score', (req, res) => {
     res.render('addScore'); 
@@ -287,41 +311,290 @@ app.post('/score', (req, res) => {
 });
 
 app.get('/player', (req, res) => {
-    res.render('addPlayer'); 
-});
-// Route for adding a player
-app.post('/player', (req, res) => {
-    const { team_id, player_name, position, nationality, jersey_number } = req.body;
+    const leaguesQuery = 'SELECT league_id, league_name FROM Leagues';
+    const matchesQuery = `
+        SELECT Matches.match_id, Home.team_name AS home_team, Away.team_name AS away_team
+        FROM Matches
+        JOIN Teams AS Home ON Matches.home_team_id = Home.team_id
+        JOIN Teams AS Away ON Matches.away_team_id = Away.team_id
+    `;
 
-    const query = `INSERT INTO Players (team_id, player_name, position, nationality, jersey_number) VALUES (?, ?, ?, ?, ?)`;
-    db.run(query, [team_id, player_name, position, nationality, jersey_number], function(err) {
+    db.all(leaguesQuery, (err, leagues) => {
         if (err) {
-            console.error(err.message);
-            return res.status(500).send("Error adding player");
+            console.error('Error fetching leagues:', err.message);
+            return res.status(500).send('Error fetching leagues');
         }
-        res.send("Player added successfully");
+
+        db.all(matchesQuery, (err, matches) => {
+            if (err) {
+                console.error('Error fetching matches:', err.message);
+                return res.status(500).send('Error fetching matches');
+            }
+
+            res.render('addPlayer', { leagues, matches }); // Pass leagues and matches to the EJS view
+        });
     });
 });
 
-app.get('/event', (req, res) => {
-    res.render('addMatchEvent'); 
-});
-// Route for adding a match event
-app.post('/event', (req, res) => {
-    const { match_id, player_id, team_id, event_type, event_time } = req.body;
+// Fetch teams for a specific match
+app.get('/player/teams/:match_id', (req, res) => {
+    const matchId = req.params.match_id;
 
-    const query = `INSERT INTO MatchEvents (match_id, player_id, team_id, event_type, event_time) VALUES (?, ?, ?, ?, ?)`;
-    db.run(query, [match_id, player_id, team_id, event_type, event_time], function(err) {
+    const query = `
+        SELECT team_id, team_name
+        FROM Teams
+        WHERE team_id IN (
+            SELECT home_team_id FROM Matches WHERE match_id = ?
+            UNION
+            SELECT away_team_id FROM Matches WHERE match_id = ?
+        )
+    `;
+
+    db.all(query, [matchId, matchId], (err, teams) => {
+        if (err) {
+            console.error('Error fetching teams:', err.message);
+            return res.status(500).json({ message: 'Error fetching teams' });
+        }
+
+        res.json(teams);
+    });
+});
+
+// Fetch players for a specific team
+app.get('/player/players/:team_id', (req, res) => {
+    const teamId = req.params.team_id;
+
+    const query = `
+        SELECT player_id, player_name
+        FROM Players
+        WHERE team_id = ?
+    `;
+
+    db.all(query, [teamId], (err, players) => {
+        if (err) {
+            console.error('Error fetching players:', err.message);
+            return res.status(500).json({ message: 'Error fetching players' });
+        }
+
+        res.json(players);
+    });
+});
+
+
+// Route for adding a player
+app.post('/player', upload.single('logo_url'), (req, res) => {
+    console.log('Request body:', req.body);
+    console.log('Uploaded file:', req.file);
+
+    const { player_name, team_id, position, nationality, jersey_number } = req.body;
+
+    // Ensure the necessary data is present
+    if (!player_name || !team_id || !jersey_number) {
+        return res.status(400).send('Player name, team ID, and jersey number are required.');
+    }
+
+    const query = `INSERT INTO Players (player_name, team_id, position, nationality, jersey_number) 
+                   VALUES (?, ?, ?, ?, ?)`;
+
+    db.run(query, [player_name, team_id, position, nationality, jersey_number], function(err) {
+        if (err) {
+            console.error('Error adding player:', err.message);
+            return res.status(500).send('Error adding player');
+        }
+
+        res.send('Player added successfully');
+    });
+});
+
+
+
+app.get('/event', (req, res) => {
+    // Query the database to get matches
+    const query = "SELECT * FROM Matches";
+    db.all(query, [], (err, matches) => {
         if (err) {
             console.error(err.message);
+            return res.status(500).send("Error fetching matches");
+        }
+
+        // Fetch teams and players for the dropdowns (if required)
+        const teamsQuery = "SELECT * FROM Teams";
+        const playersQuery = "SELECT * FROM Players";
+
+        db.all(teamsQuery, [], (err, teams) => {
+            if (err) {
+                console.error(err.message);
+                return res.status(500).send("Error fetching teams");
+            }
+
+            db.all(playersQuery, [], (err, players) => {
+                if (err) {
+                    console.error(err.message);
+                    return res.status(500).send("Error fetching players");
+                }
+
+                // Pass the data to the view
+                res.render('addMatchEvent', { matches, teams, players });
+            });
+        });
+    });
+});
+
+// Route for adding a match event
+app.post('/event', (req, res) => {
+    console.log("Raw Body Data:", req.body);
+    const { match_id, player_id, team_id, event_type, event_time, description } = req.body;
+
+    console.log("Received Data:", { match_id, player_id, team_id, event_type, event_time, description });
+
+    // Check if required fields are provided
+    if (!match_id || !event_type || !event_time) {
+        console.error("Missing required fields");
+        return res.status(400).send("Missing required fields: match_id, event_type, or event_time.");
+    }
+
+    // SQL query to insert match event
+    const query = `
+        INSERT INTO MatchEvents (match_id, player_id, team_id, event_type, event_time, description)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    db.run(query, [match_id, player_id, team_id, event_type, event_time, description || null], function(err) {
+        if (err) {
+            console.error("Error inserting match event:", err.message);
             return res.status(500).send("Error adding match event");
         }
         res.send("Match event added successfully");
     });
 });
+
+
 app.get('/database', (req, res) => {
-    res.render('database-tables'); 
+    const tables = {};
+
+    // Queries to fetch data from all tables
+    const queries = [
+        { tableName: 'Teams', query: 'SELECT * FROM Teams' },
+        { tableName: 'Matches', query: 'SELECT * FROM Matches' },
+        { tableName: 'Scores', query: 'SELECT * FROM Scores' },
+        { tableName: 'Players', query: 'SELECT * FROM Players' },
+        { tableName: 'MatchEvents', query: 'SELECT * FROM MatchEvents' }
+    ];
+
+    let queryPromises = queries.map(({ tableName, query }) =>
+        new Promise((resolve, reject) => {
+            db.all(query, (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    tables[tableName] = rows;
+                    resolve();
+                }
+            });
+        })
+    );
+
+    Promise.all(queryPromises)
+        .then(() => {
+            res.render('database-tables', { rows: tables });
+        })
+        .catch((error) => {
+            console.error('Error fetching data from the database:', error);
+            res.status(500).send('Error fetching data from the database');
+        });
 });
+app.delete('/delete/:table/:id', (req, res) => {
+    const { table, id } = req.params;
+  
+    // Dynamic SQL DELETE query based on the table
+    let deleteQuery = '';
+    if (table === 'Teams') {
+      deleteQuery = `DELETE FROM teams WHERE team_id = ?`;
+    } else if (table === 'Matches') {
+      deleteQuery = `DELETE FROM matches WHERE match_id = ?`;
+    } else if (table === 'MatchEvents') {
+      deleteQuery = `DELETE FROM match_events WHERE event_id = ?`;
+    } else if (table === 'Players') {
+      deleteQuery = `DELETE FROM players WHERE player_id = ?`;
+    } else if (table === 'Scores') {
+      deleteQuery = `DELETE FROM scores WHERE score_id = ?`;
+    } else {
+      return res.status(400).json({ success: false, error: 'Invalid table' });
+    }
+  
+    db.run(deleteQuery, [id], function(err) {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      res.json({ success: true });
+    });
+  });
+  
+  app.post('/edit/:table/:id', (req, res) => {
+    const { table, id } = req.params;
+    const { new_name } = req.body;
+  
+    let updateQuery = '';
+    if (table === 'Teams') {
+      updateQuery = `UPDATE teams SET team_name = ? WHERE team_id = ?`;
+    } else if (table === 'Matches') {
+      updateQuery = `UPDATE matches SET match_name = ? WHERE match_id = ?`;
+    } else if (table === 'MatchEvents') {
+      updateQuery = `UPDATE match_events SET event_name = ? WHERE event_id = ?`;
+    } else if (table === 'Players') {
+      updateQuery = `UPDATE players SET player_name = ? WHERE player_id = ?`;
+    } else if (table === 'Scores') {
+      updateQuery = `UPDATE scores SET score_value = ? WHERE score_id = ?`;
+    } else {
+      return res.status(400).json({ success: false, error: 'Invalid table' });
+    }
+  
+    db.run(updateQuery, [new_name, id], function(err) {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      res.json({ success: true });
+    });
+  });
+  
+  
+
+  app.get('/search', (req, res) => {
+    const query = req.query.query;
+  
+    // Handle the search for players, teams, and leagues
+    const playersQuery = `SELECT * FROM players WHERE player_name LIKE ?`;
+    const teamsQuery = `SELECT * FROM teams WHERE team_name LIKE ?`;
+    const leaguesQuery = `SELECT * FROM leagues WHERE league_name LIKE ?`;
+  
+    // Query players
+    db.all(playersQuery, [`%${query}%`], (err, players) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+  
+      // Query teams
+      db.all(teamsQuery, [`%${query}%`], (err, teams) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+  
+        // Query leagues
+        db.all(leaguesQuery, [`%${query}%`], (err, leagues) => {
+          if (err) {
+            return res.status(500).json({ error: err.message });
+          }
+  
+          // Return data as a JSON response
+          res.json({ players, teams, leagues });
+        });
+      });
+    });
+  });
+  
+  
+  
+
+
 
 // Route to fetch ongoing matches for the live game page
 app.get('/live', async (req, res) => {

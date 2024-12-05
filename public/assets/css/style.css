@@ -220,3 +220,28 @@
 .box-green { background-color: #28a745; color: white; }
 .box-yellow { background-color: #ffc107; color: black; }
 .box-#ff4d4d{ background-color: #dc3545; color: white; }
+
+
+#response-message {
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Success message style */
+#response-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Error message style */
+#response-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
